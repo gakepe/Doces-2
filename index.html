@@ -5,28 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Editor de Lista de Sabores</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      background-color: #121212;
+      background: linear-gradient(135deg, #182848 0%, #2980b9 100%);
       color: #f0f0f0;
       margin: 0;
+      min-height: 100vh;
       overflow-x: hidden;
     }
-    /* Container principal com margin-top para empurrar tudo para baixo */
+    #aviso-topo {
+      width: 100%;
+      max-width: 820px;
+      margin: 25px auto 0 auto;
+      padding: 18px 26px 10px 26px;
+      background: rgba(30,30,30,0.90);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #0004;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    #seta-baixo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      background: linear-gradient(90deg, #2196f3 0%, #64b5f6 100%);
+      color: #fff;
+      font-size: 1.22em;
+      font-weight: bold;
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin-bottom: 0;
+      margin-top: 0;
+      box-shadow: 0 2px 8px #0002;
+      border: none;
+      transition: background .2s, transform .1s;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    #seta-baixo:hover {
+      background: linear-gradient(90deg, #1976d2 0%, #2980b9 100%);
+      transform: translateY(-2px) scale(1.04);
+    }
+    #tutorial-texto {
+      color: #fff;
+      font-size: 1.1em;
+      text-align: center;
+      margin: 0 0 0 0;
+      padding: 0;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+    #espaco-vazio {
+      height: 3000px;
+      width: 100%;
+    }
     #container-principal {
-      margin-top: 3000px;
-      padding: 20px;
+      margin: 0 auto;
+      padding: 24px;
+      max-width: 900px;
+      background: rgba(30,30,30,0.85);
+      border-radius: 10px;
+      box-shadow: 0 2px 8px #0006;
     }
     h2 {
       margin-top: 0;
+      text-align: center;
+      color: #64b5f6;
+      letter-spacing: 1px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       background: #1e1e1e;
+      margin-top: 16px;
     }
     th, td {
       border: 1px solid #333;
@@ -35,87 +90,119 @@
       min-width: 80px;
       color: #f0f0f0;
     }
-    input, select {
+    th {
+      background: #2980b9;
+      color: #fff;
+      font-weight: bold;
+      font-size: 1.05em;
+    }
+    input, select, textarea {
       width: 100%;
       padding: 10px;
       font-size: 16px;
       margin-bottom: 10px;
-      border: 2px solid white;
+      border: 2px solid #64b5f6;
       border-radius: 4px;
       background-color: #121212;
       color: white;
+      transition: border-color .2s;
     }
-    input::placeholder, select option {
-      color: #ccc;
-    }
-    input:focus, select:focus {
+    textarea { resize: vertical; min-height: 60px; }
+    input::placeholder, select option { color: #bbb; }
+    input:focus, select:focus, textarea:focus {
       outline: none;
-      border-color: #64b5f6;
-      box-shadow: 0 0 5px #64b5f6;
+      border-color: #2980b9;
+      box-shadow: 0 0 5px #2980b9;
     }
-    button {
-      background-color: #2196f3;
-      color: white;
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
+    button, .modern-btn {
+      background: linear-gradient(90deg, #2196f3 0%, #64b5f6 100%);
+      color: #fff;
+      padding: 10px 22px;
+      font-size: 17px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       margin-bottom: 10px;
-    }
-    button:hover {
-      background-color: #1976d2;
-    }
-    .botoes-embaixo {
-      margin-top: 10px;
-    }
-    .botoes-embaixo button {
-      width: 48%;
+      box-shadow: 0 2px 6px #0002;
+      font-weight: 600;
+      transition: background .2s, transform .1s;
+      letter-spacing: 1px;
       display: inline-block;
-      margin: 1%;
+    }
+    button:hover, .modern-btn:hover {
+      background: linear-gradient(90deg, #1976d2 0%, #2980b9 100%);
+      transform: translateY(-2px) scale(1.03);
+    }
+    .icon-btn { padding: 10px 12px; font-size: 22px; vertical-align: middle; }
+    .botoes-superior, .botoes-embaixo { text-align: center; margin: 10px 0 20px 0; }
+    .botoes-superior > *, .botoes-embaixo > * { margin: 0 5px 10px 5px; }
+    #ordenacaoSelect, #listaSelect {
+      max-width: 180px;
+      display: inline-block;
     }
     .popup {
       position: fixed;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      background: #2c2c2c;
-      padding: 20px;
-      border-radius: 10px;
-      display: none;
+      background: #232a34;
+      padding: 22px 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.7);
+      min-width: 340px;
       z-index: 2000;
-      box-shadow: 0 0 15px rgba(0,0,0,0.6);
-      min-width: 320px;
+      display: none;
+      font-size: 1em;
+      animation: fadeIn .22s;
     }
-    .popup button {
-      width: 48%;
-      display: inline-block;
-      margin: 1% 1% 0 1%;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(.9) translate(-50%,-50%);}
+      to   { opacity: 1; transform: scale(1) translate(-50%,-50%);}
     }
-    #popupAdicionarPeso button {
-      margin-top: 10px;
+    .popup button { margin: 4px 2px 0 2px; width: auto; }
+    #mostrarAvancadasBtn { margin-bottom: 10px; }
+    @media (max-width: 650px) {
+      #container-principal, #aviso-topo { max-width: 98vw; padding: 12px;}
+      .popup { min-width: 98vw; }
     }
   </style>
 </head>
 <body>
 
-  <div id="container-principal">
-    <h2>Editor de Lista de Sabores</h2>
-
-    <button onclick="mostrarPopup('popupAdicionarPeso')">Adicionar Peso</button>
-
-    <div class="botoes-embaixo">
-      <button onclick="mostrarPopup('novaColunaPopup')">Adicionar Nova Coluna</button>
-      <button onclick="mostrarPopup('removerColunaPopup')">Remover Coluna</button>
-      <button onclick="mostrarPopup('adicionarDocePopup')">Adicionar Doce</button>
-      <button onclick="mostrarPopup('removerDocePopup')">Remover Doce</button>
-      <button onclick="baixarPNG(true)">Baixar PNG</button>
-      <button onclick="mostrarPopup('salvarPopup')">Salvar no OneDrive</button>
+  <div id="aviso-topo">
+    <button id="seta-baixo" onclick="irParaInterface()">
+      <span style="font-size: 1.2em;">⬇️</span>
+      site para baixo, não recarregue o site, caso recarregue perderá tudo não salvo
+    </button>
+    <div id="tutorial-texto">
+      Bem-vindo ao Editor de Sabores! Aqui você pode organizar, editar e salvar suas listas de doces e seus pesos em diferentes colunas. Utilize os botões abaixo para adicionar, remover, exportar ou importar listas. As opções avançadas permitem gerenciar colunas. Cada usuário vê seu próprio tutorial e suas próprias listas.
     </div>
+  </div>
 
-    <br><br>
-
+  <div id="espaco-vazio"></div>
+  <div id="container-principal">
+    <div class="botoes-superior">
+      <select id="listaSelect" onchange="trocarLista()"></select>
+      <button class="modern-btn" onclick="novaLista()">+ Nova Lista</button>
+      <button class="modern-btn" onclick="removerLista()">🗑️ Remover Lista</button>
+    </div>
+    <h2>Editor de Lista de Sabores</h2>
+    <div class="botoes-superior">
+      <button class="modern-btn icon-btn" style="font-size:20px;padding: 10px 28px;" onclick="mostrarPopup('popupAdicionarPeso')">➕ Adicionar Peso</button>
+      <button class="modern-btn" onclick="mostrarPopup('adicionarDocePopup')">+ Adicionar Doce</button>
+      <button class="modern-btn" onclick="mostrarPopup('removerDocePopup')">🗑️ Remover Doce</button>
+      <button class="modern-btn" onclick="baixarPNG(true)">📥 Baixar PNG</button>
+      <button class="modern-btn" onclick="mostrarPopup('salvarPopup')">💾 Salvar/Importar</button>
+      <select id="ordenacaoSelect" onchange="ordenarLista()">
+        <option value="alfabetica">Alfabética</option>
+        <option value="pesoAsc">Peso crescente</option>
+        <option value="pesoDesc">Peso decrescente</option>
+      </select>
+    </div>
+    <button id="mostrarAvancadasBtn" class="modern-btn" onclick="toggleAvancadas()">Mostrar opções avançadas</button>
+    <div id="opcoesAvancadas" style="display:none;" class="botoes-embaixo">
+      <button class="modern-btn" onclick="mostrarPopup('novaColunaPopup')">+ Nova Coluna</button>
+      <button class="modern-btn" onclick="mostrarPopup('removerColunaPopup')">🗑️ Remover Coluna</button>
+    </div>
     <table id="tabela">
       <thead>
         <tr><th>N</th><th>Produto</th></tr>
@@ -125,386 +212,42 @@
   </div>
 
   <!-- POPUPS -->
-
   <div id="popupAdicionarPeso" class="popup">
     <input type="text" id="buscaDoce" placeholder="Buscar doce...">
     <select id="produtoSelect"></select>
     <select id="colunaSelect"></select>
-    <input type="text" id="campoPeso" placeholder="Peso (ex: 0.250)">
-    <button onclick="adicionarQuantidade()">Adicionar Peso</button>
-    <button onclick="somarPeso()">Somar Peso</button>
-    <button onclick="adicionarZeros()">Adicionar 0</button>
-    <button onclick="limparPesosConfirm()">Limpar Pesos</button>
-    <button onclick="fecharPopup('popupAdicionarPeso')">Fechar</button>
+    <input type="number" step="0.001" id="campoPeso" placeholder="Peso (ex: 0.250)">
+    <button class="modern-btn" onclick="adicionarQuantidade()">Adicionar Peso</button>
+    <button class="modern-btn" onclick="somarPeso()">Somar Peso</button>
+    <button class="modern-btn" onclick="adicionarZeros()">Adicionar 0</button>
+    <button class="modern-btn" onclick="limparPesosConfirm()">Limpar Pesos</button>
+    <button class="modern-btn" onclick="fecharPopup('popupAdicionarPeso')">Fechar</button>
   </div>
-
   <div id="novaColunaPopup" class="popup">
     <input type="number" id="numeroColuna" placeholder="Número da nova coluna">
-    <button onclick="adicionarColunaConfirmado()">Confirmar</button>
-    <button onclick="fecharPopup('novaColunaPopup')">Fechar</button>
+    <button class="modern-btn" onclick="adicionarColunaConfirmado()">Confirmar</button>
+    <button class="modern-btn" onclick="fecharPopup('novaColunaPopup')">Fechar</button>
   </div>
-
   <div id="removerColunaPopup" class="popup">
     <select id="colunaRemover"></select>
-    <button onclick="removerColunaConfirmado()">Confirmar</button>
-    <button onclick="fecharPopup('removerColunaPopup')">Fechar</button>
+    <button class="modern-btn" onclick="removerColunaConfirmado()">Confirmar</button>
+    <button class="modern-btn" onclick="fecharPopup('removerColunaPopup')">Fechar</button>
   </div>
-
   <div id="adicionarDocePopup" class="popup">
     <input type="text" id="nomeNovoDoce" placeholder="Nome do novo doce">
-    <button onclick="adicionarLinhaConfirmado()">Adicionar</button>
-    <button onclick="fecharPopup('adicionarDocePopup')">Fechar</button>
+    <button class="modern-btn" onclick="adicionarLinhaConfirmado()">Adicionar</button>
+    <button class="modern-btn" onclick="fecharPopup('adicionarDocePopup')">Fechar</button>
   </div>
-
   <div id="removerDocePopup" class="popup">
     <input type="text" id="buscaRemover" placeholder="Buscar doce...">
     <select id="listaRemover"></select>
-    <button onclick="removerDoceConfirmado()">Remover</button>
-    <button onclick="fecharPopup('removerDocePopup')">Fechar</button>
+    <button class="modern-btn" onclick="removerDoceConfirmado()">Remover</button>
+    <button class="modern-btn" onclick="fecharPopup('removerDocePopup')">Fechar</button>
   </div>
-
   <div id="salvarPopup" class="popup">
-    <button onclick="exportarDados()">Exportar Dados</button>
+    <button class="modern-btn" onclick="exportarDados()">Exportar Dados</button>
     <input type="file" id="importarArquivo" accept=".json" style="display:none" onchange="importarDados(event)">
-    <button onclick="abrirSeletorImportacao()">Importar Dados</button>
-    <button onclick="fecharPopup('salvarPopup')">Fechar</button>
+    <button class="modern-btn" onclick="abrirSeletorImportacao()">Importar Dados</button>
+    <button class="modern-btn" onclick="fecharPopup('salvarPopup')">Fechar</button>
   </div>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script>
-// ===== VARIÁVEIS GLOBAIS =====
-let listaDoces = [];
-let totalColunas = 1;
-
-// ===== INICIALIZAÇÃO =====
-document.addEventListener("DOMContentLoaded", () => {
-  carregarDoLocalStorage();
-  atualizarDropdowns();
-  atualizarTabela();
-
-  // Eventos de filtro dos selects dentro do popup adicionar peso
-  document.getElementById("buscaDoce").addEventListener("input", filtrarDropdown);
-  document.getElementById("buscaRemover").addEventListener("input", filtrarDropdownRemover);
-
-  // Evento para inserir ponto automaticamente no campo peso
-  const campoPeso = document.getElementById("campoPeso");
-  campoPeso.addEventListener("input", function(e) {
-    let val = this.value;
-    if (val.length === 1 && /\d/.test(val) && !val.includes(".")) {
-      this.value = val + ".";
-    }
-  });
-});
-
-// ===== ATUALIZAÇÃO DE INTERFACE =====
-function atualizarDropdowns() {
-  const produtoSelect = document.getElementById("produtoSelect");
-  const colunaSelect = document.getElementById("colunaSelect");
-  const removerSelect = document.getElementById("listaRemover");
-  const colunaRemover = document.getElementById("colunaRemover");
-
-  produtoSelect.innerHTML = "";
-  removerSelect.innerHTML = "";
-
-  // Ordenar nomes
-  const nomesOrdenados = [...listaDoces.map(doc => doc.nome)].sort();
-  nomesOrdenados.forEach(nome => {
-    const opt = document.createElement("option");
-    opt.value = opt.text = nome;
-    produtoSelect.appendChild(opt);
-
-    const opt2 = document.createElement("option");
-    opt2.value = opt2.text = nome;
-    removerSelect.appendChild(opt2);
-  });
-
-  colunaSelect.innerHTML = "";
-  colunaRemover.innerHTML = "";
-  for (let i = 1; i <= totalColunas; i++) {
-    const opt = document.createElement("option");
-    opt.value = opt.text = "Q" + i;
-    colunaSelect.appendChild(opt);
-
-    const opt2 = document.createElement("option");
-    opt2.value = opt2.text = "Q" + i;
-    colunaRemover.appendChild(opt2.cloneNode(true));
-  }
-}
-
-function atualizarTabela() {
-  const tbody = document.querySelector("#tabela tbody");
-  tbody.innerHTML = "";
-  listaDoces.sort((a, b) => a.nome.localeCompare(b.nome));
-  listaDoces.forEach((doc, index) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${index + 1}</td><td>${doc.nome}</td>`;
-    for (let i = 1; i <= totalColunas; i++) {
-      const val = doc["Q" + i] || "";
-      tr.innerHTML += `<td>${val}</td>`;
-    }
-    tbody.appendChild(tr);
-  });
-}
-
-// ===== FILTROS DOS SELECTS =====
-function filtrarDropdown() {
-  const termo = this.value.toLowerCase();
-  const select = document.getElementById("produtoSelect");
-  for (let opt of select.options) {
-    opt.style.display = opt.text.toLowerCase().includes(termo) ? "block" : "none";
-  }
-}
-
-function filtrarDropdownRemover() {
-  const termo = this.value.toLowerCase();
-  const select = document.getElementById("listaRemover");
-  for (let opt of select.options) {
-    opt.style.display = opt.text.toLowerCase().includes(termo) ? "block" : "none";
-  }
-}
-
-// ===== AÇÕES =====
-
-function adicionarQuantidade() {
-  const nome = document.getElementById("produtoSelect").value;
-  const coluna = document.getElementById("colunaSelect").value;
-  const input = document.getElementById("campoPeso");
-  let valor = input.value.trim();
-
-  if (!valor.match(/^\d+(\.\d{1,3})?$/)) {
-    alert("Digite um número válido. Ex: 0.250");
-    return;
-  }
-
-  const doce = listaDoces.find(d => d.nome === nome);
-
-  if (doce[coluna]) {
-    if (!confirm(`Já existe um valor (${doce[coluna]}) para esse doce nessa coluna. Deseja substituir?`))
-      return;
-  }
-
-  doce[coluna] = valor.padEnd(5, "0");
-  salvarNoLocalStorage();
-  atualizarTabela();
-  fecharPopup("popupAdicionarPeso");
-  input.value = "";
-  document.getElementById("buscaDoce").value = "";
-}
-
-function somarPeso() {
-  const nome = document.getElementById("produtoSelect").value;
-  const coluna = document.getElementById("colunaSelect").value;
-  const campo = document.getElementById("campoPeso");
-  let valorInput = campo.value.trim();
-
-  if (!/^\d+(\.\d{1,3})?$/.test(valorInput)) {
-    alert("Digite um número válido. Ex: 0.250");
-    return;
-  }
-
-  const doce = listaDoces.find(d => d.nome === nome);
-  if (!doce) {
-    alert("Selecione um doce válido.");
-    return;
-  }
-
-  let valorExistente = doce[coluna];
-  if (!valorExistente || valorExistente === "") {
-    alert("Esse doce não possui valor nessa coluna para somar.");
-    return;
-  }
-
-  let soma = parseFloat(valorExistente) + parseFloat(valorInput);
-  doce[coluna] = soma.toFixed(3);
-
-  salvarNoLocalStorage();
-  atualizarTabela();
-  fecharPopup("popupAdicionarPeso");
-  campo.value = "";
-  document.getElementById("buscaDoce").value = "";
-}
-
-function adicionarZeros() {
-  if (!confirm("Deseja adicionar 0.000 em todos os doces sem valor na coluna?")) return;
-  const coluna = document.getElementById("colunaSelect").value;
-  listaDoces.forEach(doc => {
-    if (!doc[coluna]) doc[coluna] = "0.000";
-  });
-  salvarNoLocalStorage();
-  atualizarTabela();
-  fecharPopup("popupAdicionarPeso");
-  document.getElementById("buscaDoce").value = "";
-}
-
-function limparPesosConfirm() {
-  if (
-    !confirm("Tem certeza que deseja limpar todos os pesos?") ||
-    !confirm("Confirma novamente a limpeza de todos os pesos?") ||
-    !confirm("Última confirmação, deseja realmente limpar TODOS os pesos?")
-  ) return;
-  listaDoces.forEach(doc => {
-    for (let i = 1; i <= totalColunas; i++) {
-      delete doc["Q" + i];
-    }
-  });
-  salvarNoLocalStorage();
-  atualizarTabela();
-  fecharPopup("popupAdicionarPeso");
-  document.getElementById("buscaDoce").value = "";
-}
-
-function adicionarColunaConfirmado() {
-  const numero = parseInt(document.getElementById("numeroColuna").value);
-  if (!numero || numero < 1) return alert("Número inválido.");
-  totalColunas = Math.max(totalColunas, numero);
-  salvarNoLocalStorage();
-  atualizarDropdowns();
-  atualizarTabela();
-  fecharPopup("novaColunaPopup");
-}
-
-function removerColunaConfirmado() {
-  const coluna = document.getElementById("colunaRemover").value;
-  if (!confirm(`Tem certeza que deseja remover a coluna ${coluna}? Isso apagará todos os valores nela.`)) return;
-  if (!confirm("Confirma novamente?")) return;
-  if (!confirm("Última confirmação, deseja realmente apagar?")) return;
-  listaDoces.forEach(doc => delete doc[coluna]);
-  totalColunas--;
-  salvarNoLocalStorage();
-  atualizarDropdowns();
-  atualizarTabela();
-  fecharPopup("removerColunaPopup");
-}
-
-function adicionarLinhaConfirmado() {
-  const nome = document.getElementById("nomeNovoDoce").value.trim();
-  if (!nome) return;
-  if (listaDoces.some(d => d.nome.toLowerCase() === nome.toLowerCase())) return alert("Doce já existe.");
-  const novo = { nome };
-  for (let i = 1; i <= totalColunas; i++) novo["Q" + i] = "";
-  listaDoces.push(novo);
-  salvarNoLocalStorage();
-  atualizarDropdowns();
-  atualizarTabela();
-  fecharPopup("adicionarDocePopup");
-}
-
-function removerDoceConfirmado() {
-  const nome = document.getElementById("listaRemover").value;
-  listaDoces = listaDoces.filter(doc => doc.nome !== nome);
-  salvarNoLocalStorage();
-  atualizarDropdowns();
-  atualizarTabela();
-  fecharPopup("removerDocePopup");
-}
-
-// ===== LOCAL STORAGE =====
-function salvarNoLocalStorage() {
-  localStorage.setItem("listaDoces", JSON.stringify({ lista: listaDoces, colunas: totalColunas }));
-}
-
-function carregarDoLocalStorage() {
-  const dados = JSON.parse(localStorage.getItem("listaDoces"));
-  if (dados) {
-    listaDoces = dados.lista;
-    totalColunas = dados.colunas;
-  }
-}
-
-// ===== EXPORTAÇÃO =====
-function baixarPNG(dividido = false) {
-  // Se dividir em partes de 20 doces cada
-  if (dividido) {
-    const grupoTamanho = 20;
-    const totalGrupos = Math.ceil(listaDoces.length / grupoTamanho);
-    let grupoAtual = 0;
-
-    function baixarGrupo() {
-      if (grupoAtual >= totalGrupos) return;
-      const tbody = document.querySelector("#tabela tbody");
-      tbody.innerHTML = "";
-
-      const inicio = grupoAtual * grupoTamanho;
-      const fim = Math.min(inicio + grupoTamanho, listaDoces.length);
-
-      for (let i = inicio; i < fim; i++) {
-        const doc = listaDoces[i];
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${i + 1}</td><td>${doc.nome}</td>`;
-        for (let c = 1; c <= totalColunas; c++) {
-          tr.innerHTML += `<td>${doc["Q" + c] || ""}</td>`;
-        }
-        tbody.appendChild(tr);
-      }
-
-      html2canvas(document.querySelector("#tabela")).then(canvas => {
-        const link = document.createElement("a");
-        link.download = `lista_parte_${grupoAtual + 1}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-        grupoAtual++;
-        setTimeout(baixarGrupo, 1000);
-      });
-    }
-
-    baixarGrupo();
-
-  } else {
-    html2canvas(document.querySelector("#tabela")).then(canvas => {
-      const link = document.createElement("a");
-      link.download = "lista.png";
-      link.href = canvas.toDataURL();
-      link.click();
-    });
-  }
-}
-
-function exportarDados() {
-  const blob = new Blob([JSON.stringify({ lista: listaDoces, colunas: totalColunas }, null, 2)], { type: "application/json" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "lista-sabores.json";
-  link.click();
-}
-function abrirSeletorImportacao() {
-  const input = document.getElementById('importarArquivo');
-  input.value = ''; // limpa o valor anterior
-  input.click();    // abre o seletor de arquivos
-}
-function importarDados(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const dados = JSON.parse(reader.result);
-      if (!dados.lista || !Array.isArray(dados.lista)) throw new Error("Formato inválido");
-      listaDoces = dados.lista;
-      totalColunas = dados.colunas || 1;
-      salvarNoLocalStorage();
-      atualizarDropdowns();
-      atualizarTabela();
-      alert("Importação concluída!");
-    } catch (erro) {
-      alert("Erro ao importar os dados. Verifique o arquivo.");
-      console.error(erro);
-    }
-  };
-  reader.readAsText(file);
-}
-
-// ===== POPUPS =====
-function mostrarPopup(id) {
-  document.getElementById(id).style.display = "block";
-}
-
-function fecharPopup(id) {
-  document.getElementById(id).style.display = "none";
-  // Limpa o campo busca doce ao fechar o popup de adicionar peso
-  if (id === "popupAdicionarPeso") {
-    document.getElementById("buscaDoce").value = "";
-    document.getElementById("campoPeso").value = "";
-  }
-}
-</script>
