@@ -251,3 +251,371 @@
     <button class="modern-btn" onclick="fecharPopup('salvarPopup')">Fechar</button>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    let todasListas = {};
+    let listaAtual = "Principal";
+    let listaDoces = [];
+    let totalColunas = 1;
+
+    function mostrarPopup(id) {
+      document.getElementById(id).style.display = "block";
+    }
+    function fecharPopup(id) {
+      document.getElementById(id).style.display = "none";
+      if (id === "popupAdicionarPeso") {
+        document.getElementById("buscaDoce").value = "";
+        document.getElementById("campoPeso").value = "";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      carregarTodasListas();
+      document.getElementById("buscaDoce").addEventListener("input", filtrarDropdown);
+      document.getElementById("buscaRemover").addEventListener("input", filtrarDropdownRemover);
+
+      const campoPeso = document.getElementById("campoPeso");
+      campoPeso.addEventListener("input", function(e) {
+        let val = this.value;
+        if (val.length === 1 && /\d/.test(val) && !val.includes(".")) {
+          this.value = val + ".";
+          this.setSelectionRange(this.value.length, this.value.length);
+        }
+      });
+    });
+
+    function irParaInterface() {
+      document.getElementById("container-principal").scrollIntoView({behavior: "smooth"});
+    }
+    function salvarTodasListas() {
+      todasListas[listaAtual] = { listaDoces, totalColunas };
+      localStorage.setItem("todasListas", JSON.stringify(todasListas));
+    }
+    function carregarTodasListas() {
+      todasListas = JSON.parse(localStorage.getItem("todasListas")) || { "Principal": { listaDoces: [], totalColunas: 1 } };
+      listaAtual = Object.keys(todasListas)[0];
+      carregarListaAtual();
+      atualizarListaSelect();
+    }
+    function carregarListaAtual() {
+      let dados = todasListas[listaAtual];
+      listaDoces = dados.listaDoces;
+      totalColunas = dados.totalColunas || 1;
+      atualizarDropdowns();
+      atualizarTabela();
+      salvarTodasListas();
+    }
+    function trocarLista() {
+      listaAtual = document.getElementById("listaSelect").value;
+      carregarListaAtual();
+    }
+    function novaLista() {
+      let nome = prompt("Nome da nova lista?");
+      if (!nome || todasListas[nome]) return alert("Nome já existe ou inválido!");
+      todasListas[nome] = { listaDoces: [], totalColunas: 1 };
+      listaAtual = nome;
+      carregarListaAtual();
+      atualizarListaSelect();
+      salvarTodasListas();
+    }
+    function removerLista() {
+      if (listaAtual === "Principal") return alert("Não pode remover Principal!");
+      if (!confirm("Tem certeza?")) return;
+      delete todasListas[listaAtual];
+      listaAtual = "Principal";
+      carregarListaAtual();
+      atualizarListaSelect();
+      salvarTodasListas();
+    }
+    function atualizarListaSelect() {
+      const select = document.getElementById("listaSelect");
+      select.innerHTML = "";
+      Object.keys(todasListas).forEach(nome => {
+        let opt = document.createElement("option");
+        opt.value = opt.text = nome;
+        select.appendChild(opt);
+      });
+      select.value = listaAtual;
+    }
+    function atualizarDropdowns() {
+      const produtoSelect = document.getElementById("produtoSelect");
+      const colunaSelect = document.getElementById("colunaSelect");
+      const removerSelect = document.getElementById("listaRemover");
+      const colunaRemover = document.getElementById("colunaRemover");
+      produtoSelect.innerHTML = "";
+      removerSelect.innerHTML = "";
+      const nomesOrdenados = [...listaDoces.map(doc => doc.nome)].sort();
+      nomesOrdenados.forEach(nome => {
+        const opt = document.createElement("option");
+        opt.value = opt.text = nome;
+        produtoSelect.appendChild(opt);
+        const opt2 = document.createElement("option");
+        opt2.value = opt2.text = nome;
+        removerSelect.appendChild(opt2);
+      });
+      colunaSelect.innerHTML = "";
+      colunaRemover.innerHTML = "";
+      for (let i = 1; i <= totalColunas; i++) {
+        const opt = document.createElement("option");
+        opt.value = opt.text = "Q" + i;
+        colunaSelect.appendChild(opt);
+        const opt2 = document.createElement("option");
+        opt2.value = opt2.text = "Q" + i;
+        colunaRemover.appendChild(opt2.cloneNode(true));
+      }
+    }
+    function atualizarTabela() {
+      const tbody = document.querySelector("#tabela tbody");
+      tbody.innerHTML = "";
+      listaDoces.forEach((doc, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${index + 1}</td><td>${doc.nome}</td>`;
+        for (let i = 1; i <= totalColunas; i++) {
+          const val = doc["Q" + i] || "";
+          tr.innerHTML += `<td>${val}</td>`;
+        }
+        tbody.appendChild(tr);
+      });
+    }
+    function filtrarDropdown() {
+      const termo = this.value.toLowerCase();
+      const select = document.getElementById("produtoSelect");
+      for (let opt of select.options) {
+        opt.style.display = opt.text.toLowerCase().includes(termo) ? "block" : "none";
+      }
+    }
+    function filtrarDropdownRemover() {
+      const termo = this.value.toLowerCase();
+      const select = document.getElementById("listaRemover");
+      for (let opt of select.options) {
+        opt.style.display = opt.text.toLowerCase().includes(termo) ? "block" : "none";
+      }
+    }
+    function adicionarQuantidade() {
+      const nome = document.getElementById("produtoSelect").value;
+      const coluna = document.getElementById("colunaSelect").value;
+      const input = document.getElementById("campoPeso");
+      let valor = input.value.trim();
+      if (!valor.match(/^\d+(\.\d{1,3})?$/)) {
+        alert("Digite um número válido. Ex: 0.250");
+        return;
+      }
+      const doce = listaDoces.find(d => d.nome === nome);
+      if (doce[coluna]) {
+        if (!confirm(`Já existe um valor (${doce[coluna]}) para esse doce nessa coluna. Deseja substituir?`))
+          return;
+      }
+      doce[coluna] = valor.padEnd(5, "0");
+      salvarTodasListas();
+      atualizarTabela();
+      fecharPopup("popupAdicionarPeso");
+      input.value = "";
+      document.getElementById("buscaDoce").value = "";
+    }
+    function somarPeso() {
+      const nome = document.getElementById("produtoSelect").value;
+      const coluna = document.getElementById("colunaSelect").value;
+      const campo = document.getElementById("campoPeso");
+      let valorInput = campo.value.trim();
+      if (!/^\d+(\.\d{1,3})?$/.test(valorInput)) {
+        alert("Digite um número válido. Ex: 0.250");
+        return;
+      }
+      const doce = listaDoces.find(d => d.nome === nome);
+      if (!doce) {
+        alert("Selecione um doce válido.");
+        return;
+      }
+      let valorExistente = doce[coluna];
+      if (!valorExistente || valorExistente === "") {
+        alert("Esse doce não possui valor nessa coluna para somar.");
+        return;
+      }
+      let soma = parseFloat(valorExistente) + parseFloat(valorInput);
+      doce[coluna] = soma.toFixed(3);
+      salvarTodasListas();
+      atualizarTabela();
+      fecharPopup("popupAdicionarPeso");
+      campo.value = "";
+      document.getElementById("buscaDoce").value = "";
+    }
+    function adicionarZeros() {
+      if (!confirm("Deseja adicionar 0.000 em todos os doces sem valor na coluna?")) return;
+      const coluna = document.getElementById("colunaSelect").value;
+      listaDoces.forEach(doc => {
+        if (!doc[coluna]) doc[coluna] = "0.000";
+      });
+      salvarTodasListas();
+      atualizarTabela();
+      fecharPopup("popupAdicionarPeso");
+      document.getElementById("buscaDoce").value = "";
+    }
+    function limparPesosConfirm() {
+      if (
+        !confirm("Tem certeza que deseja limpar todos os pesos?") ||
+        !confirm("Confirma novamente a limpeza de todos os pesos?") ||
+        !confirm("Última confirmação, deseja realmente limpar TODOS os pesos?")
+      ) return;
+      listaDoces.forEach(doc => {
+        for (let i = 1; i <= totalColunas; i++) {
+          delete doc["Q" + i];
+        }
+      });
+      salvarTodasListas();
+      atualizarTabela();
+      fecharPopup("popupAdicionarPeso");
+      document.getElementById("buscaDoce").value = "";
+    }
+    function adicionarColunaConfirmado() {
+      const numero = parseInt(document.getElementById("numeroColuna").value);
+      if (!numero || numero < 1) return alert("Número inválido.");
+      totalColunas = Math.max(totalColunas, numero);
+      salvarTodasListas();
+      atualizarDropdowns();
+      atualizarTabela();
+      fecharPopup("novaColunaPopup");
+    }
+    function removerColunaConfirmado() {
+      const coluna = document.getElementById("colunaRemover").value;
+      if (!confirm(`Tem certeza que deseja remover a coluna ${coluna}? Isso apagará todos os valores nela.`)) return;
+      if (!confirm("Confirma novamente?")) return;
+      if (!confirm("Última confirmação, deseja realmente apagar?")) return;
+      listaDoces.forEach(doc => delete doc[coluna]);
+      totalColunas--;
+      salvarTodasListas();
+      atualizarDropdowns();
+      atualizarTabela();
+      fecharPopup("removerColunaPopup");
+    }
+    function adicionarLinhaConfirmado() {
+      const nome = document.getElementById("nomeNovoDoce").value.trim();
+      if (!nome) return;
+      if (listaDoces.some(d => d.nome.toLowerCase() === nome.toLowerCase())) return alert("Doce já existe.");
+      const novo = { nome };
+      for (let i = 1; i <= totalColunas; i++) novo["Q" + i] = "";
+      listaDoces.push(novo);
+      salvarTodasListas();
+      atualizarDropdowns();
+      atualizarTabela();
+      fecharPopup("adicionarDocePopup");
+    }
+    function removerDoceConfirmado() {
+      const nome = document.getElementById("listaRemover").value;
+      listaDoces = listaDoces.filter(doc => doc.nome !== nome);
+      salvarTodasListas();
+      atualizarDropdowns();
+      atualizarTabela();
+      fecharPopup("removerDocePopup");
+    }
+    function baixarPNG(dividido = false) {
+      if (dividido) {
+        const grupoTamanho = 20;
+        const totalGrupos = Math.ceil(listaDoces.length / grupoTamanho);
+        let grupoAtual = 0;
+        function baixarGrupo() {
+          if (grupoAtual >= totalGrupos) return;
+          const tbody = document.querySelector("#tabela tbody");
+          tbody.innerHTML = "";
+          const inicio = grupoAtual * grupoTamanho;
+          const fim = Math.min(inicio + grupoTamanho, listaDoces.length);
+          for (let i = inicio; i < fim; i++) {
+            const doc = listaDoces[i];
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${i + 1}</td><td>${doc.nome}</td>`;
+            for (let c = 1; c <= totalColunas; c++) {
+              tr.innerHTML += `<td>${doc["Q" + c] || ""}</td>`;
+            }
+            tbody.appendChild(tr);
+          }
+          html2canvas(document.querySelector("#tabela")).then(canvas => {
+            const link = document.createElement("a");
+            link.download = `lista_parte_${grupoAtual + 1}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            grupoAtual++;
+            setTimeout(baixarGrupo, 1000);
+          });
+        }
+        baixarGrupo();
+      } else {
+        html2canvas(document.querySelector("#tabela")).then(canvas => {
+          const link = document.createElement("a");
+          link.download = "lista.png";
+          link.href = canvas.toDataURL();
+          link.click();
+        });
+      }
+    }
+    function exportarDados() {
+      const blob = new Blob([JSON.stringify({ listaDoces, totalColunas }, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `lista-sabores-${listaAtual}.json`;
+      link.click();
+      fecharPopup('salvarPopup');
+    }
+    function abrirSeletorImportacao() {
+      const input = document.getElementById('importarArquivo');
+      input.value = '';
+      input.click();
+    }
+    function importarDados(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const dados = JSON.parse(reader.result);
+          if (!dados.listaDoces || !Array.isArray(dados.listaDoces)) throw new Error("Formato inválido");
+          listaDoces = dados.listaDoces;
+          totalColunas = dados.totalColunas || 1;
+          salvarTodasListas();
+          atualizarDropdowns();
+          atualizarTabela();
+          alert("Importação concluída!");
+          fecharPopup('salvarPopup');
+        } catch (erro) {
+          alert("Erro ao importar os dados. Verifique o arquivo.");
+          console.error(erro);
+        }
+      };
+      reader.readAsText(file);
+    }
+    function ordenarLista() {
+      const modo = document.getElementById("ordenacaoSelect").value;
+      let coluna = "Q1";
+      if (modo === "alfabetica") {
+        listaDoces.sort((a, b) => a.nome.localeCompare(b.nome));
+      } else if (modo === "pesoAsc") {
+        listaDoces.sort((a, b) => {
+          let pa = parseFloat(a[coluna]);
+          let pb = parseFloat(b[coluna]);
+          if (isNaN(pa)) pa = Infinity;
+          if (isNaN(pb)) pb = Infinity;
+          if (pa === pb) return a.nome.localeCompare(b.nome);
+          return pa - pb;
+        });
+      } else if (modo === "pesoDesc") {
+        listaDoces.sort((a, b) => {
+          let pa = parseFloat(a[coluna]);
+          let pb = parseFloat(b[coluna]);
+          if (isNaN(pa)) pa = -Infinity;
+          if (isNaN(pb)) pb = -Infinity;
+          if (pa === pb) return a.nome.localeCompare(b.nome);
+          return pb - pa;
+        });
+      }
+      atualizarTabela();
+    }
+    function toggleAvancadas() {
+      const el = document.getElementById("opcoesAvancadas");
+      if (el.style.display === "none") {
+        el.style.display = "block";
+        document.getElementById("mostrarAvancadasBtn").innerText = "Ocultar opções avançadas";
+      } else {
+        el.style.display = "none";
+        document.getElementById("mostrarAvancadasBtn").innerText = "Mostrar opções avançadas";
+      }
+    }
+  </script>
+</body>
+</html>
