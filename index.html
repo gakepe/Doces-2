@@ -18,17 +18,75 @@
     input:focus, select:focus, textarea:focus { border-color:#2980b9; outline:none;}
     button { background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%); color:#fff; padding:10px 22px; font-size:17px; border:none; border-radius:6px; cursor:pointer; margin-bottom:10px; font-weight:600; transition:background .2s,transform .1s}
     button:hover { background:linear-gradient(90deg,#1976d2 0%,#2980b9 100%);}
-    .btn-group { text-align:center; margin-bottom:18px;}
-    .popup { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#232a34; padding:22px 30px; border-radius:12px; box-shadow:0 0 18px #0008; z-index:2000; display:none; min-width:330px;}
+    .btn-group { text-align:center; margin-bottom:18px; }
+    @media (max-width:650px){
+      #container{padding:10px;} .popup{min-width:97vw;} #aviso{padding:8px;}
+      #btnTopo{font-size:18px; padding:14px 24px;}
+      .btn-group{display: flex; flex-direction: column; align-items: stretch;}
+      .btn-group > * {margin-bottom:7px;}
+    }
+    /* CORRIGIDO: Todos os popups centralizados na tela */
+    .popup {
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      background:#232a34;
+      padding:22px 30px;
+      border-radius:12px;
+      box-shadow:0 0 18px #0008;
+      z-index:3001;
+      display:none;
+      min-width:330px;
+    }
+    /* Mantém o popup-addPeso como exceção, se quiser na borda superior */
+    #popup-addPeso { top:10px !important; transform:translate(-50%,0) !important; }
     .popup input, .popup select { margin-bottom:8px;}
     .popup button { margin-right:6px; margin-bottom:0;}
-    #overlay { position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;display:none;z-index:1999; }
+    #overlay { position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;display:none;z-index:3000; }
     #aviso {max-width:900px; margin:24px auto 0 auto; padding:14px 22px; background:rgba(30,30,30,0.96); border-radius:10px; text-align:center; box-shadow:0 2px 10px #0003;}
     .red-btn { background: linear-gradient(135deg,#d32f2f 0%,#b71c1c 100%) !important; color: #fff !important; border: none; }
     .red-btn:hover { background: linear-gradient(135deg,#c62828 0%,#b71c1c 100%) !important;}
     .inline { display:inline-block; vertical-align:middle; }
-    @media (max-width:650px){ #container{padding:10px;} .popup{min-width:97vw;} #aviso{padding:8px;}
-      #btnTopo{font-size:18px; padding:14px 24px;}
+    .purple-btn {
+      background: linear-gradient(90deg, #9b27b0 0%, #af40bf 100%);
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      font-size: 17px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    .purple-btn:hover {
+      background: linear-gradient(90deg, #7a1884 0%, #922a9e 100%);
+    }
+    .trash-btn {
+      background: linear-gradient(135deg, #444 0%, #999 100%) !important;
+      color: #fff !important;
+      border: none;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      font-size: 19px;
+      margin-left: 6px;
+      margin-bottom: 0;
+      vertical-align: middle;
+      display: inline-block;
+      line-height: 33px;
+      padding: 0;
+    }
+    .trash-btn:hover {
+      background: linear-gradient(135deg, #222 0%, #555 100%) !important;
+    }
+    .row-search-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 8px;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -44,12 +102,11 @@
     <div class="btn-group">
       <select id="listaSelect"></select>
       <button id="btnNovaLista">+ Nova Lista</button>
-      <button id="btnRemoverLista">🗑️ Remover Lista</button>
-      <button id="btnAddDoce">+ Adicionar Doce</button>
-      <button id="btnRemDoce">🗑️ Remover Doce</button>
-      <button id="btnEditDoce">✏️ Editar Nome</button>
+      <button id="btnRemoverLista">🗑 Remover Lista</button>
       <button id="btnAddPeso">➕ Adicionar Peso</button>
       <button id="btnColunas">Colunas</button>
+      <button id="btnAddDoce">+ Adicionar Doce</button>
+      <button id="btnRemDoce">🗑 Remover Doce</button>
       <button id="btnExportar">💾 Exportar</button>
       <button id="btnImportar">📥 Importar</button>
       <input id="importar" type="file" accept=".json" style="display:none">
@@ -78,22 +135,21 @@
   <!-- POPUP REMOVER DOCE -->
   <div class="popup" id="popup-remDoce">
     <h3>Remover doce</h3>
+    <div class="row-search-group">
+      <input type="text" id="buscaRemover" placeholder="Buscar doce...">
+      <button id="btnLimpaBuscaRemover" class="trash-btn" title="Limpar busca">🗑</button>
+    </div>
     <select id="selRemover"></select>
     <button id="popupRemDoceBtn">Remover</button>
-    <button class="popupCancelBtn">Cancelar</button>
-  </div>
-  <!-- POPUP EDITAR DOCE -->
-  <div class="popup" id="popup-editDoce">
-    <h3>Editar nome</h3>
-    <select id="selEditDoce"></select>
-    <input type="text" id="novoNomeEdit" placeholder="Novo nome">
-    <button id="popupEditDoceBtn">Salvar</button>
     <button class="popupCancelBtn">Cancelar</button>
   </div>
   <!-- POPUP ADICIONAR PESO -->
   <div class="popup" id="popup-addPeso">
     <h3>Adicionar peso</h3>
-    <input type="text" id="buscaPeso" placeholder="Buscar doce...">
+    <div class="row-search-group">
+      <input type="text" id="buscaPeso" placeholder="Buscar doce...">
+      <button id="btnLimpaBuscaPeso" class="trash-btn" title="Limpar busca">🗑</button>
+    </div>
     <select id="selPesoDoce"></select>
     <select id="selPesoCol"></select>
     <input type="text" id="pesoNovo" maxlength="7" placeholder="Peso (ex: 0.250)">
@@ -104,8 +160,11 @@
       <button id="btnLimparPeso" class="inline">Limpar Peso</button>
       <button id="btnLimparTodosPesos" class="red-btn inline">Limpar Todos os Pesos</button>
     </div>
-    <button class="popupCancelBtn">Cancelar</button>
+    <button id="btnCalcularTotal" class="purple-btn">Calcular Peso Total</button>
+    <button id="btnPreencherZeros" style="background:linear-gradient(90deg,#2196f3 0%,#64b5f6 100%);color:#fff;font-size:16px;border:none;padding:12px;width:100%;margin-bottom:8px;border-radius:6px;">Preencher todos vazios com 0,000</button>
+    <button class="popupCancelBtn" style="margin-top:10px;">Cancelar</button>
   </div>
+
   <!-- POPUP COLUNAS -->
   <div class="popup" id="popup-colunas">
     <h3>Colunas</h3>
@@ -115,418 +174,553 @@
     <button class="popupCancelBtn">Fechar</button>
   </div>
 
-<script>
-let todasListas={}, listaAtual="Principal", listaDoces=[], totalColunas=1;
-let pesoBloqueado = false;
+  <!-- POPUP EXPORTAR PNG -->
+  <div class="popup" id="popup-exportarPNG">
+    <h3>Exportar PNG</h3>
+    <div style="margin-bottom: 12px; font-size:16px;">
+      Escolha a forma de exportar sua lista de doces:
+    </div>
+    <button id="btnExportarChunk" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
+      Baixar em várias partes (dividido)
+    </button>
+    <button id="btnExportarUnico" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#9b27b0 0%,#af40bf 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
+      Baixar em imagem única (alta qualidade)
+    </button>
+    <button class="popupCancelBtn" style="margin-top:10px; width:100%;">Cancelar</button>
+  </div>
 
-document.addEventListener("DOMContentLoaded",()=>{
-  // Botão "Ir para o site" fixo no topo
-  document.getElementById("btnTopo").onclick = function() {
-    document.getElementById("container").scrollIntoView({behavior:"smooth"});
-  };
+  <script>
+    // === INÍCIO DO JS CORRIGIDO ===
+    let todasListas={}, listaAtual="Principal", listaDoces=[], totalColunas=1;
+    let pesoBloqueado = false;
 
-  // Inicialização
-  carregarTodasListas();
-  desenharTabela();
+    document.addEventListener("DOMContentLoaded",()=>{
+      document.getElementById("btnTopo").onclick = function() {
+        document.getElementById("container").scrollIntoView({behavior:"smooth"});
+      };
 
-  // Popups Cancelar
-  document.querySelectorAll('.popupCancelBtn').forEach(btn=>{
-    btn.onclick = fecharPopup;
-  });
+      carregarTodasListas();
+      desenharTabela();
 
-  // Botões principais
-  document.getElementById("btnNovaLista").onclick = novaLista;
-  document.getElementById("btnRemoverLista").onclick = removerLista;
-  document.getElementById("listaSelect").onchange = trocarLista;
-  document.getElementById("btnAddDoce").onclick = ()=>abrirPopup('addDoce');
-  document.getElementById("btnRemDoce").onclick = ()=>abrirPopup('remDoce');
-  document.getElementById("btnEditDoce").onclick = ()=>abrirPopup('editDoce');
-  document.getElementById("btnAddPeso").onclick = ()=>abrirPopup('addPeso');
-  document.getElementById("btnColunas").onclick = ()=>abrirPopup('colunas');
-  document.getElementById("btnExportar").onclick = confirmarExportar;
-  document.getElementById("btnImportar").onclick = confirmarImportar;
-  document.getElementById("importar").onchange = importar;
-  document.getElementById("btnPNG").onclick = baixarPNGVarios;
-  document.getElementById("btnApagarTudo").onclick = apagarTudo;
-  document.getElementById("ordenacaoSelect").onchange = ordenarLista;
-
-  // Popup Adicionar Doce
-  document.getElementById("popupAddDoceBtn").onclick = addDoce;
-  // Popup Remover Doce
-  document.getElementById("popupRemDoceBtn").onclick = remDoce;
-  // Popup Editar Doce
-  document.getElementById("popupEditDoceBtn").onclick = editDoce;
-  // Popup Adicionar Peso
-  document.getElementById("btnAddPesoPopup").onclick = addPeso;
-  document.getElementById("btnDesbloqueia").onclick = desbloquearPeso;
-  document.getElementById("btnSomarPeso").onclick = somarPeso;
-  document.getElementById("btnLimparPeso").onclick = limparPeso;
-  document.getElementById("btnLimparTodosPesos").onclick = limparTodosPesosColuna;
-  document.getElementById("buscaPeso").addEventListener('input', filtrarDropdownPeso);
-
-  // Ponto automático no campo peso
-  document.getElementById('pesoNovo').addEventListener('input', function(e){
-    let v = this.value;
-    if (v.length === 1 && /\d/.test(v) && !v.includes('.')) {
-      this.value = v + '.';
-      this.setSelectionRange(this.value.length, this.value.length);
-    }
-  });
-
-  // Popups de colunas
-  document.getElementById("btnNovaColuna").onclick = novaColuna;
-  document.getElementById("btnRemColuna").onclick = remColuna;
-
-  // Overlay fecha popup ao clicar fora
-  document.getElementById('overlay').onclick = fecharPopup;
-});
-
-// LISTAS
-function novaLista() {
-  let nome = prompt("Nome da nova lista?");
-  if(!nome || todasListas[nome]) return alert("Nome já existe ou inválido!");
-  todasListas[nome]={listaDoces:[],totalColunas:1}; listaAtual=nome;
-  carregarListaAtual(); atualizarListaSelect(); salvarTodasListas();
-}
-function removerLista() {
-  if(listaAtual==="Principal") return alert("Não pode remover Principal!");
-  if(!confirm("Tem certeza?")) return;
-  delete todasListas[listaAtual]; listaAtual="Principal";
-  carregarListaAtual(); atualizarListaSelect(); salvarTodasListas();
-}
-function trocarLista() {
-  listaAtual = document.getElementById("listaSelect").value;
-  carregarListaAtual(); desenharTabela();
-}
-function atualizarListaSelect() {
-  let sel = document.getElementById("listaSelect"); sel.innerHTML="";
-  Object.keys(todasListas).forEach(nome=>{
-    let opt=document.createElement("option");
-    opt.value=opt.text=nome; sel.appendChild(opt);
-  }); sel.value=listaAtual;
-}
-
-// LOCALSTORAGE
-function salvarTodasListas() {
-  todasListas[listaAtual]={listaDoces,totalColunas};
-  localStorage.setItem("todasListas",JSON.stringify(todasListas));
-}
-function carregarTodasListas() {
-  try {
-    todasListas=JSON.parse(localStorage.getItem("todasListas"))||{"Principal":{listaDoces:[],totalColunas:1}};
-  }catch{ todasListas={"Principal":{listaDoces:[],totalColunas:1}}; }
-  listaAtual=Object.keys(todasListas)[0];
-  carregarListaAtual(); atualizarListaSelect();
-}
-function carregarListaAtual() {
-  let dados = todasListas[listaAtual];
-  listaDoces = dados.listaDoces; totalColunas = dados.totalColunas||1;
-  desenharTabela(); salvarTodasListas();
-}
-  // TABELA E DROPDOWNS
-function desenharTabela(subset=null) {
-  // subset: array de doces para renderizar, ou null para todos
-  let docesParaDesenhar = subset || listaDoces;
-  // Cabeçalho
-  let ths = `<tr><th>#</th><th>Doce</th>`;
-  for(let i=1;i<=totalColunas;i++) ths+=`<th>Q${i}</th>`;
-  ths+=`</tr>`;
-  document.querySelector("#tabela thead").innerHTML = ths;
-  // Corpo
-  let tds = '';
-    docesParaDesenhar.forEach((doc,i)=>{
-    tds+=`<tr><td>${i+1}</td><td>${doc.nome}</td>`;
-    for(let c=1;c<=totalColunas;c++) tds+=`<td>${doc["Q"+c]||""}</td>`;
-    tds+=`</tr>`;
-  });
-  document.querySelector("#tabela tbody").innerHTML = tds;
-}
-
-// POPUPS
-function abrirPopup(tipo) {
-  document.getElementById('overlay').style.display='block';
-  document.querySelectorAll('.popup').forEach(p=>p.style.display='none');
-  document.getElementById('popup-'+tipo).style.display='block';
-
-  if(tipo==='remDoce') montarSelRemover();
-  if(tipo==='editDoce') montarSelEditDoce();
-  if(tipo==='addPeso') montarSelPeso();
-  if(tipo==='colunas') montarSelColuna();
-
-  // Função "errado" ao abrir popup de peso
-  if(tipo==='addPeso') {
-    pesoBloqueado = false;
-    document.getElementById('btnAddPesoPopup').disabled = false;
-    document.getElementById('btnDesbloqueia').style.display = 'none';
-    let sel = document.getElementById('selPesoDoce');
-    let erradoOpt = document.createElement('option');
-    erradoOpt.value = erradoOpt.text = 'errado';
-    sel.insertBefore(erradoOpt, sel.firstChild);
-    sel.value = 'errado';
-    document.getElementById('buscaPeso').value = '';
-    filtrarDropdownPeso();
-  }
-}
-function fecharPopup() {
-  document.getElementById('overlay').style.display='none';
-  document.querySelectorAll('.popup').forEach(p=>p.style.display='none');
-}
-
-// DOCES
-function addDoce() {
-  let nome = document.getElementById('novoDoce').value.trim();
-  if(!nome) return alert("Nome vazio!");
-  if(listaDoces.some(d=>d.nome.toLowerCase()===nome.toLowerCase())) return alert("Doce já existe!");
-  let novo = {nome};
-  for(let i=1;i<=totalColunas;i++) novo["Q"+i]="";
-  listaDoces.push(novo);
-  desenharTabela();
-  fecharPopup();
-  salvarTodasListas();
-  document.getElementById('novoDoce').value="";
-}
-function montarSelRemover() {
-  let sel = document.getElementById('selRemover'); sel.innerHTML='';
-  listaDoces.forEach(d=>{
-    let opt=document.createElement('option');
-    opt.value=opt.text=d.nome; sel.appendChild(opt);
-  });
-}
-function remDoce() {
-  let nome = document.getElementById('selRemover').value;
-  listaDoces = listaDoces.filter(d=>d.nome!==nome);
-  desenharTabela(); fecharPopup(); salvarTodasListas();
-}
-function montarSelEditDoce() {
-  let sel = document.getElementById('selEditDoce'); sel.innerHTML='';
-  listaDoces.forEach(d=>{
-    let opt=document.createElement('option');
-    opt.value=opt.text=d.nome; sel.appendChild(opt);
-  });
-  document.getElementById('novoNomeEdit').value="";
-}
-function editDoce() {
-  let nomeSel = document.getElementById('selEditDoce').value;
-  let novoNome = document.getElementById('novoNomeEdit').value.trim();
-  if(!novoNome) return alert("Nome vazio!");
-  if(listaDoces.some(d=>d.nome.toLowerCase()===novoNome.toLowerCase())) return alert("Já existe um doce com esse nome!");
-  listaDoces.find(d=>d.nome===nomeSel).nome=novoNome;
-  desenharTabela(); fecharPopup(); salvarTodasListas();
-}
-
-// PESOS — BUSCA
-function filtrarDropdownPeso() {
-  let termo = document.getElementById('buscaPeso').value.toLowerCase();
-  let sel = document.getElementById('selPesoDoce');
-  for(let i=0;i<sel.options.length;i++) {
-    let opt = sel.options[i];
-    opt.style.display = opt.text.toLowerCase().includes(termo) ? "block" : "none";
-  }
-  let visiveis = [...sel.options].filter(o=>o.style.display=="block");
-  if(visiveis.length) sel.value = visiveis[0].value;
-  else sel.value = "errado";
-}
-
-// PESOS — FUNÇÕES
-function montarSelPeso() {
-  let selD = document.getElementById('selPesoDoce');
-  let selC = document.getElementById('selPesoCol');
-  selD.innerHTML = ''; selC.innerHTML = '';
-  listaDoces.forEach(d=>{
-    let opt=document.createElement('option');
-    opt.value=opt.text=d.nome; selD.appendChild(opt);
-  });
-  for(let i=1;i<=totalColunas;i++){
-    let opt=document.createElement('option');
-    opt.value=opt.text="Q"+i; selC.appendChild(opt);
-  }
-}
-function addPeso() {
-  let doce = document.getElementById('selPesoDoce').value;
-  let coluna = document.getElementById('selPesoCol').value;
-  let valor = document.getElementById('pesoNovo').value.trim();
-  if(doce==='errado') {
-    alert("Você tentou adicionar peso ao item 'errado'. O botão está bloqueado. Clique no X vermelho para desbloquear.");
-    pesoBloqueado = true;
-    document.getElementById('btnAddPesoPopup').disabled = true;
-    document.getElementById('btnDesbloqueia').style.display = 'inline-block';
-    return;
-  }
-  if(!valor.match(/^\d+(\.\d{1,3})?$/)) return alert("Peso inválido!");
-  let doceObj = listaDoces.find(d=>d.nome===doce);
-  if(doceObj[coluna]) if(!confirm(`Já existe valor (${doceObj[coluna]}) nessa coluna. Substituir?`)) return;
-  doceObj[coluna]=valor.padEnd(5,"0");
-  desenharTabela(); fecharPopup(); salvarTodasListas();
-  document.getElementById('pesoNovo').value="";
-}
-
-function desbloquearPeso() {
-  pesoBloqueado = false;
-  document.getElementById('btnAddPesoPopup').disabled = false;
-  document.getElementById('btnDesbloqueia').style.display = 'none';
-  document.getElementById('selPesoDoce').value = 'errado';
-}
-
-function somarPeso() {
-  let doce = document.getElementById('selPesoDoce').value;
-  let coluna = document.getElementById('selPesoCol').value;
-  let valor = document.getElementById('pesoNovo').value.trim();
-  if(doce==='errado') return alert("Não é possível somar peso ao item 'errado'.");
-  let doceObj = listaDoces.find(d=>d.nome===doce);
-  if(!doceObj[coluna]) return alert("Esse doce não possui peso definido nessa coluna para somar.");
-  if(!valor.match(/^\d+(\.\d{1,3})?$/)) return alert("Peso inválido!");
-  if(!confirm(`Peso atual: ${doceObj[coluna]}\nDeseja somar ${valor} ao peso atual?`)) return;
-  let soma = parseFloat(doceObj[coluna]) + parseFloat(valor);
-  doceObj[coluna] = soma.toFixed(3);
-  desenharTabela(); fecharPopup(); salvarTodasListas();
-  document.getElementById('pesoNovo').value="";
-}
-
-function limparPeso() {
-  let doce = document.getElementById('selPesoDoce').value;
-  let coluna = document.getElementById('selPesoCol').value;
-  if(doce==='errado') return alert("Não é possível limpar peso do item 'errado'.");
-  let doceObj = listaDoces.find(d=>d.nome===doce);
-  if(!doceObj[coluna]) return alert("Esse doce já está sem peso nessa coluna.");
-  if(!confirm("Deseja realmente limpar o peso desse doce na coluna selecionada?")) return;
-  doceObj[coluna] = "";
-  desenharTabela(); fecharPopup(); salvarTodasListas();
-}
-
-// NOVO: Limpar todos os pesos da coluna selecionada
-function limparTodosPesosColuna() {
-  let coluna = document.getElementById('selPesoCol').value;
-  if(!coluna) return alert("Selecione a coluna!");
-  if(!confirm("Isso vai remover TODOS os pesos dos doces da coluna " + coluna + ". Tem certeza?")) return;
-  listaDoces.forEach(doc=>doc[coluna]="");
-  desenharTabela(); salvarTodasListas();
-  alert("Todos os pesos da coluna " + coluna + " foram limpos.");
-}
-
-// COLUNAS
-function montarSelColuna() {
-  let sel = document.getElementById('selRemCol'); sel.innerHTML = '';
-  for(let i=1;i<=totalColunas;i++){
-    let opt=document.createElement('option');
-    opt.value=opt.text="Q"+i; sel.appendChild(opt);
-  }
-}
-function novaColuna() {
-  totalColunas++;
-  listaDoces.forEach(d=>d["Q"+totalColunas]="");
-  desenharTabela(); montarSelColuna(); salvarTodasListas();
-}
-function remColuna() {
-  let col = document.getElementById('selRemCol').value;
-  listaDoces.forEach(d=>delete d[col]);
-  totalColunas--;
-  desenharTabela(); montarSelColuna(); salvarTodasListas();
-}
-
-// EXPORTAR/IMPORTAR
-function confirmarExportar() {
-  if(!confirm("Deseja exportar os dados da lista atual?")) return;
-  salvar();
-}
-function salvar() {
-  let blob=new Blob([JSON.stringify({listaDoces,totalColunas},null,2)],{type:"application/json"});
-  let link=document.createElement("a");
-  link.href=URL.createObjectURL(blob); link.download="lista-doces.json"; link.click();
-}
-function confirmarImportar() {
-  if(!confirm("Deseja importar uma lista (isso irá substituir a atual)?")) return;
-  document.getElementById('importar').click();
-}
-function importar(e) {
-  let file = e.target.files[0];
-  if(!file) return;
-  let reader=new FileReader();
-  reader.onload=()=>{
-    try{
-      let dados=JSON.parse(reader.result);
-      if(!dados.listaDoces||!Array.isArray(dados.listaDoces)) throw "Formato inválido";
-      listaDoces=dados.listaDoces; totalColunas=dados.totalColunas||1;
-      desenharTabela(); salvarTodasListas();
-      alert("Importado!");
-    }catch{ alert("Erro ao importar. Arquivo inválido."); }
-  };
-  reader.readAsText(file);
-}
-
-// APAGAR TUDO
-function apagarTudo() {
-  if(!confirm("Isso apagará toda a lista!")) return;
-  listaDoces=[]; totalColunas=1;
-  desenharTabela(); salvarTodasListas();
-}
-
-// ORDENAR
-function ordenarLista() {
-  const modo = document.getElementById("ordenacaoSelect").value;
-  let coluna = "Q1";
-  if (modo === "alfabetica") {
-    listaDoces.sort((a,b)=>a.nome.localeCompare(b.nome));
-  } else if (modo === "pesoAsc") {
-    listaDoces.sort((a,b)=>{
-      let pa = parseFloat(a[coluna]);
-      let pb = parseFloat(b[coluna]);
-      if(isNaN(pa))pa=Infinity;if(isNaN(pb))pb=Infinity;
-      if(pa===pb)return a.nome.localeCompare(b.nome);
-      return pa-pb;
-    });
-  } else if (modo === "pesoDesc") {
-    listaDoces.sort((a,b)=>{
-      let pa = parseFloat(a[coluna]);
-      let pb = parseFloat(b[coluna]);
-      if(isNaN(pa))pa=-Infinity;if(isNaN(pb))pb=-Infinity;
-      if(pa===pb)return a.nome.localeCompare(b.nome);
-      return pb-pa;
-    });
-  }
-  desenharTabela();
-}
-
-// PNG
-// NOVO: Baixar várias imagens de até 20 linhas cada
-function baixarPNGVarios() {
-  if (!listaDoces.length) {
-    alert("A lista está vazia!");
-    return;
-  }
-  const total = listaDoces.length;
-  const chunkSize = 20;
-  let origTHead = document.querySelector("#tabela thead").innerHTML;
-
-  let baixarChunk = (chunk, idx, totalChunks, callback) => {
-    desenharTabela(chunk);
-    setTimeout(() => {
-      html2canvas(document.getElementById("tabela")).then(canvas=>{
-        let link=document.createElement("a");
-        let n = idx+1;
-        link.download=`lista_${n}de${totalChunks}.png`;
-        link.href=canvas.toDataURL();
-        link.click();
-        if (callback) callback();
+      document.querySelectorAll('.popupCancelBtn').forEach(btn=>{
+        btn.onclick = fecharPopup;
       });
-    }, 150); // aguarda renderização
-  };
 
-  let chunks = [];
-  for(let i=0; i<total; i+=chunkSize) {
-    chunks.push(listaDoces.slice(i, i+chunkSize));
-  }
+      document.getElementById("btnNovaLista").onclick = novaLista;
+      document.getElementById("btnRemoverLista").onclick = removerLista;
+      document.getElementById("listaSelect").onchange = trocarLista;
+      document.getElementById("btnAddDoce").onclick = ()=>abrirPopup('addDoce');
+      document.getElementById("btnRemDoce").onclick = ()=>abrirPopup('remDoce');
+      document.getElementById("btnAddPeso").onclick = ()=>abrirPopup('addPeso');
+      document.getElementById("btnColunas").onclick = ()=>abrirPopup('colunas');
+      document.getElementById("btnExportar").onclick = confirmarExportar;
+      document.getElementById("btnImportar").onclick = confirmarImportar;
+      document.getElementById("importar").onchange = importar;
+      document.getElementById("btnPNG").onclick = ()=>abrirPopup('exportarPNG');
+      document.getElementById("btnApagarTudo").onclick = apagarTudo;
+      document.getElementById("ordenacaoSelect").onchange = ordenarLista;
 
-  function baixarProximo(idx) {
-    if(idx>=chunks.length) {
-      desenharTabela(); // restaura tabela completa após exportar
-      document.querySelector("#tabela thead").innerHTML = origTHead;
-      return;
+      document.getElementById("popupAddDoceBtn").onclick = addDoce;
+      document.getElementById("popupRemDoceBtn").onclick = remDoce;
+
+      document.getElementById("btnAddPesoPopup").onclick = addPeso;
+      document.getElementById("btnDesbloqueia").onclick = desbloquearPeso;
+      document.getElementById("btnSomarPeso").onclick = somarPeso;
+      document.getElementById("btnLimparPeso").onclick = limparPeso;
+      document.getElementById("btnLimparTodosPesos").onclick = limparTodosPesosColuna;
+      document.getElementById("buscaPeso").addEventListener('input', filtrarDropdownPeso);
+      document.getElementById("btnLimpaBuscaPeso").onclick = ()=>{
+        document.getElementById("buscaPeso").value = "";
+        filtrarDropdownPeso();
+      };
+      document.getElementById("btnCalcularTotal").onclick = calcularPesoTotal;
+      document.getElementById("btnPreencherZeros").onclick = preencherZeros;
+
+      document.getElementById("buscaRemover").addEventListener('input', filtrarDropdownRemover);
+      document.getElementById("btnLimpaBuscaRemover").onclick = ()=>{
+        document.getElementById("buscaRemover").value = "";
+        filtrarDropdownRemover();
+      };
+
+      document.getElementById("btnExportarChunk").onclick = function(){
+        fecharPopup(); baixarPNGVarios();
+      };
+      document.getElementById("btnExportarUnico").onclick = function(){
+        fecharPopup(); baixarPNGUnico();
+      };
+
+      // Campo peso - ponto automático, mas agora totalmente apagável
+      let pesoInput = document.getElementById('pesoNovo');
+      pesoInput.addEventListener('input', function(e){
+        let v = this.value;
+        if (v.length === 1 && /\d/.test(v) && !v.includes('.')) {
+          this.value = v + '.';
+          this.setSelectionRange(this.value.length, this.value.length);
+        }
+      });
+
+      document.getElementById("btnNovaColuna").onclick = novaColuna;
+      document.getElementById("btnRemColuna").onclick = remColuna;
+      document.getElementById('overlay').onclick = fecharPopup;
+    });
+
+    // LISTAS
+    function novaLista() {
+      let nome = prompt("Nome da nova lista?");
+      if(!nome || todasListas[nome]) return alert("Nome já existe ou inválido!");
+      todasListas[nome]={listaDoces:[],totalColunas:1}; listaAtual=nome;
+      carregarListaAtual(); atualizarListaSelect(); salvarTodasListas();
     }
-    baixarChunk(chunks[idx], idx, chunks.length, ()=>baixarProximo(idx+1));
-  }
-  baixarProximo(0);
-}
+    function removerLista() {
+      if(listaAtual==="Principal") return alert("Não pode remover Principal!");
+      if(!confirm("Tem certeza?")) return;
+      delete todasListas[listaAtual]; listaAtual="Principal";
+      carregarListaAtual(); atualizarListaSelect(); salvarTodasListas();
+    }
+    function trocarLista() {
+      listaAtual = document.getElementById("listaSelect").value;
+      carregarListaAtual(); desenharTabela();
+    }
+    function atualizarListaSelect() {
+      let sel = document.getElementById("listaSelect"); sel.innerHTML="";
+      Object.keys(todasListas).forEach(nome=>{
+        let opt=document.createElement("option");
+        opt.value=opt.text=nome; sel.appendChild(opt);
+      }); sel.value=listaAtual;
+    }
 
-</script>
+    // LOCALSTORAGE
+    function salvarTodasListas() {
+      todasListas[listaAtual]={listaDoces,totalColunas};
+      localStorage.setItem("todasListas",JSON.stringify(todasListas));
+    }
+    function carregarTodasListas() {
+      try {
+        todasListas=JSON.parse(localStorage.getItem("todasListas"))||{"Principal":{listaDoces:[],totalColunas:1}};
+        if (Object.keys(todasListas).length === 0) {
+          todasListas = {"Principal":{listaDoces:[],totalColunas:1}};
+        }
+      }catch{ todasListas={"Principal":{listaDoces:[],totalColunas:1}}; }
+      listaAtual=Object.keys(todasListas)[0] || "Principal";
+      carregarListaAtual(); atualizarListaSelect();
+    }
+    function carregarListaAtual() {
+      let dados = todasListas[listaAtual];
+      listaDoces = dados.listaDoces; totalColunas = dados.totalColunas||1;
+      desenharTabela(); salvarTodasListas();
+    }
+
+    // TABELA E DROPDOWNS
+    function desenharTabela(subset=null) {
+      let docesParaDesenhar = subset || listaDoces;
+      let ths = `<tr><th>#</th><th>Doce</th>`;
+      for(let i=1;i<=totalColunas;i++) ths+=`<th>Q${i}</th>`;
+      ths+=`</tr>`;
+      document.querySelector("#tabela thead").innerHTML = ths;
+      let tds = '';
+      docesParaDesenhar.forEach((doc,i)=>{
+        tds+=`<tr><td>${i+1}</td><td>${doc.nome}</td>`;
+        for(let c=1;c<=totalColunas;c++) tds+=`<td>${doc["Q"+c]||""}</td>`;
+        tds+=`</tr>`;
+      });
+      document.querySelector("#tabela tbody").innerHTML = tds;
+    }
+    function abrirPopup(tipo) {
+      document.getElementById('overlay').style.display='block';
+      document.querySelectorAll('.popup').forEach(p=>p.style.display='none');
+      let popup = document.getElementById('popup-'+tipo);
+      if (popup) popup.style.display='block';
+
+      if(tipo==='remDoce') {
+        montarSelRemover();
+        document.getElementById('buscaRemover').value = "";
+        filtrarDropdownRemover();
+      }
+      if(tipo==='addPeso') {
+        montarSelPeso();
+        pesoBloqueado = false;
+        document.getElementById('btnAddPesoPopup').disabled = false;
+        document.getElementById('btnSomarPeso').disabled = false;
+        document.getElementById('btnLimparPeso').disabled = false;
+        document.getElementById('btnDesbloqueia').style.display = 'none';
+        let sel = document.getElementById('selPesoDoce');
+        let erradoOpt = document.createElement('option');
+        erradoOpt.value = erradoOpt.text = 'errado';
+        sel.insertBefore(erradoOpt, sel.firstChild);
+        sel.value = 'errado';
+        document.getElementById('pesoNovo').value = "";
+        filtrarDropdownPeso();
+      }
+      if(tipo==='colunas') montarSelColuna();
+    }
+    function fecharPopup() {
+      document.getElementById('overlay').style.display='none';
+      document.querySelectorAll('.popup').forEach(p=>p.style.display='none');
+    }
+
+    // DOCES
+    function addDoce() {
+      let nome = document.getElementById('novoDoce').value.trim();
+      if(!nome) return alert("Nome vazio!");
+      if(listaDoces.some(d=>d.nome.toLowerCase()===nome.toLowerCase())) return alert("Doce já existe!");
+      let novo = {nome};
+      for(let i=1;i<=totalColunas;i++) novo["Q"+i]="";
+      listaDoces.push(novo);
+      desenharTabela();
+      fecharPopup();
+      salvarTodasListas();
+      document.getElementById('novoDoce').value="";
+    }
+function montarSelRemover() {
+      let sel = document.getElementById('selRemover');
+      sel.innerHTML='';
+      listaDoces.forEach(d=>{
+        let opt=document.createElement('option');
+        opt.value=opt.text=d.nome;
+        sel.appendChild(opt);
+      });
+    }
+    function filtrarDropdownRemover() {
+      let termo = document.getElementById('buscaRemover').value.trim().toLowerCase();
+      let sel = document.getElementById('selRemover');
+      for(let i=0;i<sel.options.length;i++) {
+        let opt = sel.options[i];
+        let optTxt = opt.text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        let termoBusca = termo.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+        let optBusca = optTxt.replace(/\s+/g, " ").trim();
+        opt.style.display = optBusca.includes(termoBusca) ? "block" : "none";
+      }
+      let visiveis = [...sel.options].filter(o => o.style.display == "block");
+      if (!visiveis.some(o => o.value === sel.value)) {
+        if (visiveis.length) {
+          sel.value = visiveis[0].value;
+        }
+      }
+    }
+    function remDoce() {
+      let nome = document.getElementById('selRemover').value;
+      listaDoces = listaDoces.filter(d=>d.nome!==nome);
+      desenharTabela(); fecharPopup(); salvarTodasListas();
+    }
+
+    // PESOS — BUSCA
+    function filtrarDropdownPeso() {
+      let termo = document.getElementById('buscaPeso').value.trim().toLowerCase();
+      let sel = document.getElementById('selPesoDoce');
+      for(let i=0;i<sel.options.length;i++) {
+        let opt = sel.options[i];
+        let optTxt = opt.text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        let termoBusca = termo.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+        let optBusca = optTxt.replace(/\s+/g, " ").trim();
+        opt.style.display = optBusca.includes(termoBusca) ? "block" : "none";
+      }
+      let visiveis = [...sel.options].filter(o => o.style.display == "block");
+      if (!visiveis.some(o => o.value === sel.value)) {
+        if (sel.value !== 'errado' && visiveis.length) {
+          sel.value = visiveis[0].value;
+        }
+      }
+    }
+
+    // PESOS — FUNÇÕES
+    function montarSelPeso() {
+      let selD = document.getElementById('selPesoDoce');
+      let selC = document.getElementById('selPesoCol');
+      selD.innerHTML = '';
+      selC.innerHTML = '';
+      listaDoces.forEach(d=>{
+        let opt=document.createElement('option');
+        opt.value=opt.text=d.nome;
+        selD.appendChild(opt);
+      });
+      for(let i=1;i<=totalColunas;i++){
+        let opt=document.createElement('option');
+        opt.value=opt.text="Q"+i;
+        selC.appendChild(opt);
+      }
+    }
+    function addPeso() {
+      if(pesoBloqueado) return;
+      let doce = document.getElementById('selPesoDoce').value;
+      let coluna = document.getElementById('selPesoCol').value;
+      let valor = document.getElementById('pesoNovo').value.trim();
+      if(doce==='errado') {
+        pesoBloqueado = true;
+        document.getElementById('btnAddPesoPopup').disabled = true;
+        document.getElementById('btnSomarPeso').disabled = true;
+        document.getElementById('btnLimparPeso').disabled = true;
+        document.getElementById('btnDesbloqueia').style.display = 'inline-block';
+        alert("Você tentou adicionar peso ao item 'errado'. O botão está bloqueado. Clique no X vermelho para desbloquear.");
+        return;
+      }
+      if(!valor.match(/^\d+(\.\d{1,3})?$/)) return alert("Peso inválido!");
+      let doceObj = listaDoces.find(d=>d.nome===doce);
+      if(doceObj[coluna]) if(!confirm(`Já existe valor (${doceObj[coluna]}) nessa coluna. Substituir?`)) return;
+      doceObj[coluna]=valor.padEnd(5,"0");
+      desenharTabela();
+      salvarTodasListas();
+      document.getElementById('pesoNovo').value="";
+      document.getElementById('selPesoDoce').value = 'errado';
+      document.getElementById('btnAddPesoPopup').disabled = false;
+      document.getElementById('btnSomarPeso').disabled = false;
+      document.getElementById('btnLimparPeso').disabled = false;
+      document.getElementById('btnDesbloqueia').style.display = 'none';
+    }
+    function desbloquearPeso() {
+      pesoBloqueado = false;
+      document.getElementById('btnAddPesoPopup').disabled = false;
+      document.getElementById('btnSomarPeso').disabled = false;
+      document.getElementById('btnLimparPeso').disabled = false;
+      document.getElementById('btnDesbloqueia').style.display = 'none';
+    }
+    function somarPeso() {
+      if(pesoBloqueado) return;
+      let doce = document.getElementById('selPesoDoce').value;
+      let coluna = document.getElementById('selPesoCol').value;
+      let valor = document.getElementById('pesoNovo').value.trim();
+      if(doce==='errado') {
+        pesoBloqueado = true;
+        document.getElementById('btnAddPesoPopup').disabled = true;
+        document.getElementById('btnSomarPeso').disabled = true;
+        document.getElementById('btnLimparPeso').disabled = true;
+        document.getElementById('btnDesbloqueia').style.display = 'inline-block';
+        alert("Você tentou somar peso ao item 'errado'. O botão está bloqueado. Clique no X vermelho para desbloquear.");
+        return;
+      }
+      let doceObj = listaDoces.find(d=>d.nome===doce);
+      if(!doceObj[coluna]) return alert("Esse doce não possui peso definido nessa coluna para somar.");
+      if(!valor.match(/^\d+(\.\d{1,3})?$/)) return alert("Peso inválido!");
+      if(!confirm(`Peso atual: ${doceObj[coluna]}\nDeseja somar ${valor} ao peso atual?`)) return;
+      let soma = parseFloat(doceObj[coluna]) + parseFloat(valor);
+      doceObj[coluna] = soma.toFixed(3);
+      desenharTabela();
+      salvarTodasListas();
+      document.getElementById('pesoNovo').value="";
+      document.getElementById('selPesoDoce').value = 'errado';
+      document.getElementById('btnAddPesoPopup').disabled = false;
+      document.getElementById('btnSomarPeso').disabled = false;
+      document.getElementById('btnLimparPeso').disabled = false;
+      document.getElementById('btnDesbloqueia').style.display = 'none';
+    }
+    function limparPeso() {
+      if(pesoBloqueado) return;
+      let doce = document.getElementById('selPesoDoce').value;
+      let coluna = document.getElementById('selPesoCol').value;
+      if(doce==='errado') {
+        pesoBloqueado = true;
+        document.getElementById('btnAddPesoPopup').disabled = true;
+        document.getElementById('btnSomarPeso').disabled = true;
+        document.getElementById('btnLimparPeso').disabled = true;
+        document.getElementById('btnDesbloqueia').style.display = 'inline-block';
+        alert("Você tentou limpar peso do item 'errado'. O botão está bloqueado. Clique no X vermelho para desbloquear.");
+        return;
+      }
+      let doceObj = listaDoces.find(d=>d.nome===doce);
+      if(!doceObj[coluna]) return alert("Esse doce já está sem peso nessa coluna.");
+      if(!confirm("Deseja realmente limpar o peso desse doce na coluna selecionada?")) return;
+      doceObj[coluna] = "";
+      desenharTabela();
+      salvarTodasListas();
+      document.getElementById('pesoNovo').value="";
+      document.getElementById('selPesoDoce').value = 'errado';
+      document.getElementById('btnAddPesoPopup').disabled = false;
+      document.getElementById('btnSomarPeso').disabled = false;
+      document.getElementById('btnLimparPeso').disabled = false;
+      document.getElementById('btnDesbloqueia').style.display = 'none';
+    }
+    function limparTodosPesosColuna() {
+      let coluna = document.getElementById('selPesoCol').value;
+      if(!coluna) return alert("Selecione a coluna!");
+      if(!confirm("Isso vai remover TODOS os pesos dos doces da coluna " + coluna + ". Tem certeza?")) return;
+      listaDoces.forEach(doc=>doc[coluna]="");
+      desenharTabela();
+      salvarTodasListas();
+      alert("Todos os pesos da coluna " + coluna + " foram limpos.");
+    }
+    function calcularPesoTotal() {
+      let total = 0;
+      listaDoces.forEach(doc => {
+        for(let i=1; i<=totalColunas; i++) {
+          let val = parseFloat(doc["Q"+i]);
+          if(!isNaN(val)) total += val;
+        }
+      });
+      alert(`Peso total de todos os doces na lista: ${total.toFixed(3)}`);
+    }
+    function preencherZeros() {
+      let coluna = document.getElementById('selPesoCol').value;
+      if(!coluna) return alert("Selecione a coluna!");
+      if(!confirm("Isso irá preencher com 0,000 todos os doces SEM valor na coluna selecionada. Deseja continuar?")) return;
+      if(!confirm("Essa ação é irreversível para esses doces. Tem certeza MESMO?")) return;
+      let alterou = false;
+      listaDoces.forEach(doc=>{
+        if(!doc[coluna]) { doc[coluna]="0.000"; alterou=true; }
+      });
+      if(alterou) {
+        desenharTabela();
+        salvarTodasListas();
+        alert("Todos os doces sem valor nessa coluna receberam 0,000.");
+      } else {
+        alert("Não havia nenhum doce sem valor nessa coluna.");
+      }
+    }
+
+    // COLUNAS
+    function montarSelColuna() {
+      let sel = document.getElementById('selRemCol');
+      sel.innerHTML = '';
+      for(let i=1;i<=totalColunas;i++){
+        let opt=document.createElement('option');
+        opt.value=opt.text="Q"+i;
+        sel.appendChild(opt);
+      }
+    }
+    function novaColuna() {
+      totalColunas++;
+      listaDoces.forEach(d=>d["Q"+totalColunas]="");
+      desenharTabela(); montarSelColuna(); salvarTodasListas();
+    }
+    function remColuna() {
+      let col = document.getElementById('selRemCol').value;
+      listaDoces.forEach(d=>delete d[col]);
+      totalColunas--;
+      desenharTabela(); montarSelColuna(); salvarTodasListas();
+    }
+
+    // EXPORTAR/IMPORTAR
+    function confirmarExportar() {
+      if(!confirm("Deseja exportar os dados da lista atual?")) return;
+      salvar();
+    }
+    function salvar() {
+      let blob=new Blob([JSON.stringify({listaDoces,totalColunas},null,2)],{type:"application/json"});
+      let link=document.createElement("a");
+      link.href=URL.createObjectURL(blob);
+      link.download="lista-doces.json";
+      link.click();
+    }
+    function confirmarImportar() {
+      if(!confirm("Deseja importar uma lista (isso irá substituir a atual)?")) return;
+      document.getElementById('importar').click();
+    }
+    function importar(e) {
+      let file = e.target.files[0];
+      if(!file) return;
+      let reader=new FileReader();
+      reader.onload=()=>{
+        try {
+          let dados=JSON.parse(reader.result);
+          if(!dados.listaDoces||!Array.isArray(dados.listaDoces)) throw "Formato inválido";
+          listaDoces=dados.listaDoces;
+          totalColunas=dados.totalColunas||1;
+          desenharTabela(); salvarTodasListas();
+          alert("Importado!");
+        } catch {
+          alert("Erro ao importar. Arquivo inválido.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // APAGAR TUDO
+    function apagarTudo() {
+      if(!confirm("Isso apagará toda a lista!")) return;
+      listaDoces=[]; totalColunas=1;
+      desenharTabela(); salvarTodasListas();
+    }
+
+    // ORDENAR
+    function ordenarLista() {
+      const modo = document.getElementById("ordenacaoSelect").value;
+      let coluna = "Q1";
+      if (modo === "alfabetica") {
+        listaDoces.sort((a,b)=>a.nome.localeCompare(b.nome));
+      } else if (modo === "pesoAsc") {
+        listaDoces.sort((a,b)=>{
+          let pa = parseFloat(a[coluna]);
+          let pb = parseFloat(b[coluna]);
+          if(isNaN(pa))pa=Infinity;if(isNaN(pb))pb=Infinity;
+          if(pa===pb)return a.nome.localeCompare(b.nome);
+          return pa-pb;
+        });
+      } else if (modo === "pesoDesc") {
+        listaDoces.sort((a,b)=>{
+          let pa = parseFloat(a[coluna]);
+          let pb = parseFloat(b[coluna]);
+          if(isNaN(pa))pa=-Infinity;if(isNaN(pb))pb=-Infinity;
+          if(pa===pb)return a.nome.localeCompare(b.nome);
+          return pb-pa;
+        });
+      }
+      desenharTabela();
+    }
+
+    // PNG - Baixar em partes (chunks)
+    function baixarPNGVarios() {
+      if (!listaDoces.length) {
+        alert("A lista está vazia!");
+        return;
+      }
+      const total = listaDoces.length;
+      const chunkSize = 20;
+      let origTHead = document.querySelector("#tabela thead").innerHTML;
+
+      let baixarChunk = (chunk, idx, totalChunks, callback) => {
+        desenharTabela(chunk);
+        setTimeout(() => {
+          html2canvas(document.getElementById("tabela")).then(canvas=>{
+            let link=document.createElement("a");
+            let n = idx+1;
+            link.download=`lista_${n}de${totalChunks}.png`;
+            link.href=canvas.toDataURL();
+            link.click();
+            if (callback) callback();
+          });
+        }, 150);
+      };
+
+      let chunks = [];
+      for(let i=0; i<total; i+=chunkSize) {
+        chunks.push(listaDoces.slice(i, i+chunkSize));
+      }
+
+      function baixarProximo(idx) {
+        if(idx>=chunks.length) {
+          desenharTabela();
+          document.querySelector("#tabela thead").innerHTML = origTHead;
+          return;
+        }
+        baixarChunk(chunks[idx], idx, chunks.length, ()=>baixarProximo(idx+1));
+      }
+      baixarProximo(0);
+    }
+
+    // PNG - Baixar imagem única com alta qualidade
+    function baixarPNGUnico() {
+      const tabela = document.getElementById("tabela");
+      const origStyle = tabela.style.cssText;
+      
+      tabela.style.width = "auto";
+      tabela.style.height = "auto";
+
+      html2canvas(tabela, {
+        scale: 2,
+        scrollX: -window.scrollX,
+        scrollY: -window.scrollY,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
+      }).then(canvas => {
+        tabela.style.cssText = origStyle;
+        const link = document.createElement('a');
+        link.download = 'lista_doces_unica.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }).catch(err=>{
+        tabela.style.cssText = origStyle;
+        alert("Erro ao gerar imagem única: "+err);
+      });
+    }
+    // === FIM DO JS CORRIGIDO ===
+  </script>
 </body>
 </html>
