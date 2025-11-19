@@ -24,6 +24,7 @@
     .btn-group { text-align:center; margin-bottom:18px; }
     @media (max-width:650px){
       #container{padding:10px;} .popup{min-width:97vw;} #aviso{padding:8px;}
+      #btnUndo{font-size:16px; padding:10px 20px;}
       .btn-group{display: flex; flex-direction: column; align-items: stretch;}
       .btn-group > * {margin-bottom:7px;}
     }
@@ -101,21 +102,21 @@
     <div style="margin-bottom:16px;">
       <button id="btnUndo" disabled>↶ Desfazer (Ctrl+Z)</button>
     </div>
-    
+
     <div class="btn-group">
       <select id="listaSelect"></select>
-      <button id="btnNovaLista">+ Nova Lista</button>
-      <button id="btnRemoverLista"> Remover Lista</button>
-      <button id="btnAddPeso"> Adicionar Peso</button>
-      <button id="btnColunas">Colunas</button>
-      <button id="btnAddDoce">+ Adicionar Doce</button>
-      <button id="btnRemDoce"> Remover Doce</button>
-      <button id="btnExportar"> Exportar</button>
-      <button id="btnImportar"> Importar</button>
+      <button id="btnNovaLista">➕ Nova Lista</button>
+      <button id="btnRemoverLista">🗑️ Remover Lista</button>
+      <button id="btnAddPeso">⚖️ Adicionar Peso</button>
+      <button id="btnColunas">📊 Colunas</button>
+      <button id="btnAddDoce">➕ Adicionar Doce</button>
+      <button id="btnRemDoce">🗑️ Remover Doce</button>
+      <button id="btnExportar">💾 Exportar</button>
+      <button id="btnImportar">📂 Importar</button>
       <input id="importar" type="file" accept=".json" style="display:none">
-      <button id="btnPNG"> PNG</button>
+      <button id="btnPNG">🖼️ PNG</button>
       <button id="btnPDF">📄 PDF</button>
-      <button id="btnApagarTudo"> Apagar tudo</button>
+      <button id="btnApagarTudo" class="red-btn">⚠️ Apagar tudo</button>
       <select id="ordenacaoSelect">
         <option value="alfabetica">Alfabética</option>
         <option value="pesoAsc">Peso crescente</option>
@@ -133,7 +134,7 @@
   <div class="popup" id="popup-novaLista">
     <h3>Nova Lista</h3>
     <input type="text" id="nomeLista" placeholder="Nome da lista">
-    <label style="color:#fff; display:block; margin-bottom:8px;">Tipo de lista:</label>
+    <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 8px;">Tipo de lista:</label>
     <select id="tipoLista">
       <option value="peso">Lista de Peso (LPP) - 0,000 a 99,999</option>
       <option value="unidade">Lista de Unidade (LPU) - 0 a 99999</option>
@@ -149,6 +150,7 @@
     <button id="popupAddDoceBtn">Adicionar</button>
     <button class="popupCancelBtn">Cancelar</button>
   </div>
+
   <!-- POPUP REMOVER DOCE -->
   <div class="popup" id="popup-remDoce">
     <h3>Remover doce</h3>
@@ -160,6 +162,7 @@
     <button id="popupRemDoceBtn">Remover</button>
     <button class="popupCancelBtn">Cancelar</button>
   </div>
+
   <!-- POPUP ADICIONAR PESO -->
   <div class="popup" id="popup-addPeso">
     <h3>Adicionar peso</h3>
@@ -172,10 +175,9 @@
     <input type="text" id="pesoNovo" maxlength="7" placeholder="Peso (ex: 0.250)">
     <div style="margin-bottom:8px;">
       <button id="btnAddPesoPopup" class="inline">Adicionar Peso</button>
-      <button id="btnSubstituirPeso" class="inline purple-btn" style="display:inline-block; width:auto; margin-bottom:0;">Substituir</button>
       <button id="btnSomarPeso" class="inline">Somar Peso</button>
       <button id="btnLimparPeso" class="inline">Limpar Peso</button>
-      <button id="btnLimparTodosPesos" class="red-btn inline" style="display:inline-block; width:auto; margin-bottom:0;">Limpar Todos os Pesos</button>
+      <button id="btnLimparTodosPesos" class="red-btn inline">Limpar Todos os Pesos</button>
     </div>
     <button id="btnCalcularTotal" class="purple-btn">Calcular Peso Total</button>
     <button id="btnPreencherZeros" style="background:linear-gradient(90deg,#2196f3 0%,#64b5f6 100%);color:#fff;font-size:16px;border:none;padding:12px;width:100%;margin-bottom:8px;border-radius:6px;">Preencher todos vazios com 0,000</button>
@@ -185,9 +187,9 @@
   <!-- POPUP COLUNAS -->
   <div class="popup" id="popup-colunas">
     <h3>Colunas</h3>
-    <button id="btnNovaColuna">+ Nova coluna</button>
+    <button id="btnNovaColuna">➕ Nova coluna</button>
     <select id="selRemCol"></select>
-    <button id="btnRemColuna">Remover coluna</button>
+    <button id="btnRemColuna">🗑️ Remover coluna</button>
     <button class="popupCancelBtn">Fechar</button>
   </div>
 
@@ -198,10 +200,10 @@
       Escolha a forma de exportar sua lista de doces:
     </div>
     <button id="btnExportarChunk" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-      Baixar em várias partes (dividido)
+      📥 Baixar em várias partes (dividido)
     </button>
     <button id="btnExportarUnico" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#9b27b0 0%,#af40bf 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-      Baixar em imagem única (alta qualidade)
+      🖼️ Baixar em imagem única (alta qualidade)
     </button>
     <button class="popupCancelBtn" style="margin-top:10px; width:100%;">Cancelar</button>
   </div>
@@ -225,8 +227,8 @@
   <div class="popup" id="popup-confirmarSubstituicao">
     <h3>Valor Atual</h3>
     <p id="valorAtualText" style="font-size: 16px; margin-bottom: 16px; color: #64b5f6;"></p>
-    <p style="margin-bottom: 16px; color:#fff;">Este doce já possui um valor nesta coluna. Use o botão "Substituir" para trocar.</p>
-    <button class="popupCancelBtn">OK</button>
+    <p style="margin-bottom: 16px; color: #fff;">Este doce já possui um valor nesta coluna. Clique OK para fechar.</p>
+    <button class="popupCancelBtn" style="width: 100%;">OK</button>
   </div>
 
   <script>
@@ -274,7 +276,6 @@
       document.getElementById("popupRemDoceBtn").onclick = remDoce;
 
       document.getElementById("btnAddPesoPopup").onclick = addPeso;
-      document.getElementById("btnSubstituirPeso").onclick = substituirPeso;
       document.getElementById("btnSomarPeso").onclick = somarPeso;
       document.getElementById("btnLimparPeso").onclick = limparPeso;
       document.getElementById("btnLimparTodosPesos").onclick = limparTodosPesosColuna;
@@ -631,28 +632,6 @@
       document.getElementById('selPesoDoce').value = '-- Selecione um doce --';
     }
 
-    function substituirPeso() {
-      let doce = document.getElementById('selPesoDoce').value;
-      let coluna = document.getElementById('selPesoCol').value;
-      let valor = document.getElementById('pesoNovo').value.trim();
-      
-      if(doce==='-- Selecione um doce --') return alert("Selecione um doce!");
-      if(!validarPeso(valor)) return alert(`Valor inválido! ${tipoLista === "unidade" ? "Use números inteiros entre 0 e 99999." : "Use formato 0.000"}`);
-      
-      let doceObj = listaDoces.find(d=>d.nome===doce);
-      if(!doceObj[coluna]) return alert("Este doce não possui valor nesta coluna. Use 'Adicionar'!");
-      
-      if(!confirm(`Deseja substituir o valor atual (${doceObj[coluna]}) por ${valor}?`)) return;
-      
-      salvarAcao(`Substituir peso do doce "${doce}"`);
-      
-      doceObj[coluna]=formatarPeso(valor);
-      desenharTabela();
-      salvarTodasListas();
-      document.getElementById('pesoNovo').value="";
-      document.getElementById('selPesoDoce').value = '-- Selecione um doce --';
-    }
-
     function somarPeso() {
       let doce = document.getElementById('selPesoDoce').value;
       let coluna = document.getElementById('selPesoCol').value;
@@ -958,13 +937,11 @@
       const margin = 10;
       let yPosition = margin;
 
-      // Título
       doc.setFont("Arial", "bold");
       doc.setFontSize(16);
       doc.text(`Lista de Doces - ${listaAtual}`, margin, yPosition);
       yPosition += 15;
 
-      // Cabeçalho da tabela
       doc.setFont("Arial", "bold");
       doc.setFontSize(11);
       doc.setFillColor(41, 128, 185);
@@ -979,7 +956,6 @@
       }
       yPosition += 10;
 
-      // Doces
       doc.setFont("Arial", "normal");
       doc.setFontSize(10);
       doc.setTextColor(0, 0, 0);
@@ -1009,13 +985,11 @@
       const margin = 10;
       let yPosition = margin;
 
-      // Título
       doc.setFont("Arial", "bold");
       doc.setFontSize(16);
       doc.text(`Lista de Doces - ${listaAtual}`, margin, yPosition);
       yPosition += 15;
 
-      // Cabeçalho da tabela
       doc.setFont("Arial", "bold");
       doc.setFontSize(11);
       doc.setDrawColor(41, 128, 185);
@@ -1024,7 +998,6 @@
       let colWidth = (pageWidth - 2 * margin) / (totalColunas + 2);
       let rowHeight = 15;
 
-      // Desenhar cabeçalho
       doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight);
       doc.text("#", margin + 2, yPosition + 10);
       doc.text("Doce", margin + colWidth + 2, yPosition + 10);
@@ -1033,7 +1006,6 @@
       }
       yPosition += rowHeight;
 
-      // Linhas em branco (20 linhas por padrão)
       doc.setFont("Arial", "normal");
       for (let i = 0; i < 20; i++) {
         if (yPosition + rowHeight > pageHeight - margin) {
