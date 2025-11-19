@@ -2,245 +2,277 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Editor de Listas de Doces</title>
   <style>
-    body { font-family: Arial,sans-serif; background:linear-gradient(135deg,#182848 0%,#2980b9 100%); color:#f0f0f0; margin:0; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; overflow-x: hidden; margin: 0; padding: 0; }
     
-    #btnUndo { position:fixed; top:25px; left:50%; transform:translateX(-50%); z-index:3000; background:linear-gradient(90deg,#4CAF50 0%,#45a049 100%); color:#fff; padding:12px 30px; font-size:16px; border:none; border-radius:10px; cursor:pointer; box-shadow:0 2px 12px #0005; font-weight:700; transition:background .2s,transform .1s; }
+    body { font-family: Arial,sans-serif; background:linear-gradient(135deg,#182848 0%,#2980b9 100%); color:#f0f0f0; margin:0; padding:0; }
+    
+    #btnUndo { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:2999; background:linear-gradient(90deg,#4CAF50 0%,#45a049 100%); color:#fff; padding:10px 20px; font-size:14px; border:none; border-radius:10px; cursor:pointer; box-shadow:0 2px 12px #0005; font-weight:700; transition:background .2s,transform .1s; }
     #btnUndo:hover:not(:disabled) { background:linear-gradient(90deg,#388E3C 0%,#2E7D32 100%); transform:translateX(-50%) scale(1.04); }
     #btnUndo:disabled { background:#ccc; cursor:not-allowed; opacity:0.5; }
     
-    #espacoVazio { height:3000px; width:100%; }
-    #container { max-width:950px; margin:32px auto; background:rgba(30,30,30,0.92); border-radius: 12px; box-shadow:0 2px 20px #0005; padding: 26px; }
-    h2 { text-align:center; color:#64b5f6; margin-top:0; }
-    table { width:100%; border-collapse:collapse; background:#1e1e1e; margin-top:16px;}
-    th,td { border:1px solid #333; padding:10px; text-align:center; min-width:80px; color:#f0f0f0;}
-    th { background:#2980b9; color:#fff; font-weight:bold;}
-    input, select, textarea { width:100%; padding:10px; font-size:16px; margin-bottom:10px; border:2px solid #64b5f6; border-radius:4px; background:#121212; color:white;}
+    #container { width:100%; max-width:100%; margin:80px 0 20px 0; background:rgba(30,30,30,0.92); border-radius: 12px; box-shadow:0 2px 20px #0005; padding: 14px; }
+    h2 { text-align:center; color:#64b5f6; margin-top:0; margin-bottom:14px; }
+    .lista-section { width:100%; background:rgba(0,0,0,0.3); border-radius:10px; padding:12px; min-height:350px; }
+    .lista-section h3 { color:#64b5f6; border-bottom:2px solid #64b5f6; padding-bottom:8px; font-size:18px; margin-top:0; margin-bottom:10px; }
+    table { width:100%; border-collapse:collapse; background:#1e1e1e; margin-top:8px; font-size:13px; border: 2px solid #333; }
+    th,td { border:1px solid #333; padding:8px; text-align:left; color:#f0f0f0; word-wrap: break-word; overflow-wrap: break-word; min-width: 60px; width: auto;}
+    th { background:#2980b9; color:#fff; font-weight:bold; font-size:13px;}
+    input, select, textarea { width:100%; padding:10px; font-size:16px; margin-bottom:8px; border:2px solid #64b5f6; border-radius:4px; background:#121212; color:white; box-sizing:border-box; }
     input:focus, select:focus, textarea:focus { border-color:#2980b9; outline:none;}
-    button { background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%); color:#fff; padding:10px 22px; font-size:17px; border:none; border-radius:6px; cursor:pointer; margin-bottom:10px; font-weight:600; transition:background .2s,transform .1s}
+    button { background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%); color:#fff; padding:11px 16px; font-size:14px; border:none; border-radius:6px; cursor:pointer; margin-bottom:8px; font-weight:600; transition:background .2s,transform .1s; }
     button:hover { background:linear-gradient(90deg,#1976d2 0%,#2980b9 100%);}
-    .btn-group { text-align:center; margin-bottom:18px; }
-    @media (max-width:650px){
-      #container{padding:10px;} .popup{min-width:97vw;} #aviso{padding:8px;}
-      #btnUndo{font-size:16px; padding:10px 20px;}
-      .btn-group{display: flex; flex-direction: column; align-items: stretch;}
-      .btn-group > * {margin-bottom:7px;}
-    }
+    .btn-group { text-align:center; margin-bottom:12px; display:flex; gap:6px; flex-wrap:wrap; justify-content:center; width:100%; }
+    .btn-group button { margin:0; flex:1; min-width:90px; padding:11px 12px; font-size:13px; }
+    .btn-group select { padding:10px 10px; font-size:14px; margin:0; flex:1; min-width:90px; }
+    
     .popup {
       position:fixed;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%);
+      left:auto;
+      right:20px;
+      top:80px;
+      width:90vw;
+      max-width:500px;
       background:#232a34;
-      padding:22px 30px;
-      border-radius:12px;
-      box-shadow:0 0 18px #0008;
+      padding:20px;
+      border-radius: 12px;
+      box-shadow:0 2px 30px #0008;
       z-index:3001;
       display:none;
-      min-width:330px;
+      max-height:calc(100vh - 150px);
+      overflow-y:auto;
+      box-sizing: border-box;
     }
-    .popup input, .popup select { margin-bottom:8px;}
-    .popup button { margin-right:6px; margin-bottom:0;}
+    
+    .popup h3 { color:#64b5f6; margin-top:0; margin-bottom:16px; font-size:18px; }
+    .popup label { color: #fff; font-weight: 600; display: block; margin-bottom: 6px; font-size:13px;}
+    .popup input, .popup select { margin-bottom:14px; font-size:16px; padding:12px;}
+    .popup button { margin-right:0; margin-bottom:8px; width:100%; font-size:15px; padding:14px;}
+    
     #overlay { position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;display:none;z-index:3000; }
-    #aviso {max-width:900px; margin:24px auto 0 auto; padding:14px 22px; background:rgba(30,30,30,0.96); border-radius:10px; text-align:center; box-shadow:0 2px 10px #0003;}
+    #aviso {width:100%; margin:16px 0 0 0; padding:12px 16px; background:rgba(30,30,30,0.96); border-radius:10px; text-align:center; font-size:13px; box-shadow:0 2px 10px #0003;}
     .red-btn { background: linear-gradient(135deg,#d32f2f 0%,#b71c1c 100%) !important; color: #fff !important; border: none; }
     .red-btn:hover { background: linear-gradient(135deg,#c62828 0%,#b71c1c 100%) !important;}
-    .inline { display:inline-block; vertical-align:middle; }
-    .purple-btn {
-      background: linear-gradient(90deg, #9b27b0 0%, #af40bf 100%);
-      color: #fff;
-      border: none;
-      padding: 10px 22px;
-      font-size: 17px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s, transform 0.1s;
-      margin-bottom: 10px;
-      width: 100%;
-    }
-    .purple-btn:hover {
-      background: linear-gradient(90deg, #7a1884 0%, #922a9e 100%);
-    }
+    .green-btn { background: linear-gradient(135deg,#4CAF50 0%,#45a049 100%) !important; color: #fff !important; border: none; }
+    .green-btn:hover { background: linear-gradient(135deg,#388E3C 0%,#2E7D32 100%) !important;}
+    .blue-btn { background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%) !important; color: #fff !important; border: none; }
+    .blue-btn:hover { background: linear-gradient(90deg,#1976d2 0%,#2980b9 100%) !important;}
+    .purple-btn { background: linear-gradient(135deg,#9b27b0 0%,#af40bf 100%) !important; color: #fff !important; border: none; }
+    .purple-btn:hover { background: linear-gradient(135deg,#7a1884 0%,#922a9e 100%) !important;}
     .trash-btn {
-      background: linear-gradient(135deg, #444 0%, #999 100%) !important;
+      background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%) !important;
       color: #fff !important;
       border: none;
       border-radius: 50%;
-      width: 34px;
-      height: 34px;
-      font-size: 19px;
-      margin-left: 6px;
-      margin-bottom: 0;
-      vertical-align: middle;
-      display: inline-block;
-      line-height: 33px;
+      width: 32px;
+      height: 32px;
+      font-size: 14px;
       padding: 0;
+      cursor:pointer;
+      line-height: 32px;
+      text-align:center;
+      vertical-align: middle;
     }
     .trash-btn:hover {
-      background: linear-gradient(135deg, #222 0%, #555 100%) !important;
+      background: linear-gradient(135deg, #b71c1c 0%, #7d0909 100%) !important;
     }
-    .row-search-group {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-bottom: 8px;
+    .inline { display:inline-block; margin-right:6px; margin-bottom:0; }
+
+    @media (max-width:768px){
+      .popup { width: 95vw; max-width: 95vw; right: 10px; }
+      .btn-group { gap: 5px; }
+      .btn-group button, .btn-group select { min-width: 85px; padding: 10px 10px; font-size: 12px; }
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <div id="espacoVazio"></div>
   <div id="aviso">
-    <b>Bem-vindo!</b> Organize listas de doces, colunas, pesos e exporte/importe tudo. <br>
-    Não recarregue o site sem salvar!
+    <b>📋 Editor de Listas de Doces</b> Organize suas listas com emojis e facilidade!
   </div>
+  
   <div id="container">
-    <div style="margin-bottom:16px;">
+    <div style="margin-bottom:10px;">
       <button id="btnUndo" disabled>↶ Desfazer (Ctrl+Z)</button>
     </div>
 
     <div class="btn-group">
-      <select id="listaSelect"></select>
-      <button id="btnNovaLista"> Nova Lista</button>
-      <button id="btnRemoverLista"> Remover Lista</button>
-      <button id="btnAddPeso"> Adicionar Peso</button>
-      <button id="btnColunas"> Colunas</button>
-      <button id="btnAddDoce"> Adicionar Doce</button>
-      <button id="btnRemDoce"> Remover Doce</button>
-      <button id="btnExportar"> Exportar</button>
-      <button id="btnImportar"> Importar</button>
+      <select id="listaSelect" style="flex: 2;"></select>
+      <button id="btnNovaLista" class="green-btn">➕ Nova</button>
+      <button id="btnRemoverLista" class="red-btn">✕ Remover</button>
+    </div>
+
+    <div class="btn-group">
+      <button id="btnAddDoce" class="blue-btn">🍬 Adicionar</button>
+      <button id="btnRemDoce" class="blue-btn">🗑️ Remover</button>
+      <button id="btnAddPeso">⚖️ Peso</button>
+      <button id="btnColunas">📊 Colunas</button>
+    </div>
+
+    <div class="btn-group">
+      <button id="btnExportar">📥 Exportar</button>
+      <button id="btnImportar">📤 Importar</button>
       <input id="importar" type="file" accept=".json" style="display:none">
-      <button id="btnPNG"> PNG</button>
-      <button id="btnPDF"> PDF</button>
-      <button id="btnApagarTudo" class="red-btn"> Apagar tudo</button>
-      <select id="ordenacaoSelect">
-        <option value="alfabetica">Alfabética</option>
-        <option value="pesoAsc">Peso crescente</option>
-        <option value="pesoDesc">Peso decrescente</option>
+      <button id="btnPNG">🖼️ PNG</button>
+      <button id="btnPDF">📄 PDF</button>
+      <button id="btnApagarTudo" class="red-btn">🗑️ Apagar</button>
+    </div>
+
+    <div class="btn-group">
+      <select id="ordenacaoSelect" style="flex: 2;">
+        <option value="alfabetica">📝 Alfabética</option>
+        <option value="pesoAsc">⬆️ Peso crescente</option>
+        <option value="pesoDesc">⬇️ Peso decrescente</option>
       </select>
     </div>
-    <table id="tabela">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
+
+    <div class="lista-section" id="listaSection">
+      <h3 id="tituloLista">🍬 Lista de Doces</h3>
+      <table id="tabela">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
+  
   <div id="overlay"></div>
 
   <!-- POPUP NOVA LISTA -->
   <div class="popup" id="popup-novaLista">
-    <h3>Nova Lista</h3>
-    <input type="text" id="nomeLista" placeholder="Nome da lista">
-    <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 8px;">Tipo de lista:</label>
+    <h3>📋 Nova Lista</h3>
+    <label>Nome da lista:</label>
+    <input type="text" id="nomeLista" placeholder="Ex: Doces Festa">
+    
+    <label>Tipo de lista:</label>
     <select id="tipoLista">
-      <option value="peso">Lista de Peso (LPP) - 0,000 a 99,999</option>
-      <option value="unidade">Lista de Unidade (LPU) - 0 a 99999</option>
+      <option value="peso">⚖️ Peso (0,000 a 99,999)</option>
+      <option value="unidade">🔢 Unidade (0 a 99999)</option>
     </select>
-    <button id="popupNovaListaBtn">Criar</button>
+    
+    <button id="popupNovaListaBtn" class="green-btn">Criar</button>
     <button class="popupCancelBtn">Cancelar</button>
   </div>
 
   <!-- POPUP ADICIONAR DOCE -->
   <div class="popup" id="popup-addDoce">
-    <h3>Novo doce</h3>
-    <input type="text" id="novoDoce" placeholder="Nome do doce">
-    <button id="popupAddDoceBtn">Adicionar</button>
+    <h3>🍬 Novo Doce</h3>
+    <label>Nome do doce:</label>
+    <input type="text" id="novoDoce" placeholder="Ex: Chocolate 🍫">
+    
+    <button id="popupAddDoceBtn" class="blue-btn">Adicionar</button>
     <button class="popupCancelBtn">Cancelar</button>
   </div>
 
   <!-- POPUP REMOVER DOCE -->
   <div class="popup" id="popup-remDoce">
-    <h3>Remover doce</h3>
-    <div class="row-search-group">
-      <input type="text" id="buscaRemover" placeholder="Buscar doce...">
-      <button id="btnLimpaBuscaRemover" class="trash-btn" title="Limpar busca">✕</button>
-    </div>
+    <h3>🗑️ Remover Doce</h3>
+    <label>Buscar doce:</label>
+    <input type="text" id="buscaRemover" placeholder="Digite para buscar...">
+    
+    <label>Selecione:</label>
     <select id="selRemover"></select>
-    <button id="popupRemDoceBtn">Remover</button>
+    
+    <button id="popupRemDoceBtn" class="red-btn">Remover</button>
     <button class="popupCancelBtn">Cancelar</button>
   </div>
 
   <!-- POPUP ADICIONAR PESO -->
   <div class="popup" id="popup-addPeso">
-    <h3>Adicionar peso</h3>
-    <div class="row-search-group">
-      <input type="text" id="buscaPeso" placeholder="Buscar doce...">
-      <button id="btnLimpaBuscaPeso" class="trash-btn" title="Limpar busca">✕</button>
-    </div>
+    <h3>⚖️ Gerenciar Pesos</h3>
+    <label>Buscar doce:</label>
+    <input type="text" id="buscaPeso" placeholder="Digite para buscar...">
+    
+    <label>Doce:</label>
     <select id="selPesoDoce"></select>
+    
+    <label>Coluna:</label>
     <select id="selPesoCol"></select>
-    <input type="text" id="pesoNovo" maxlength="7" placeholder="Peso (ex: 0.250)">
-    <div style="margin-bottom:8px;">
-      <button id="btnAddPesoPopup" class="inline">Adicionar Peso</button>
-      <button id="btnDesbloqueia" class="red-btn inline" style="display:none;">✕ Desbloquear</button>
-      <button id="btnSomarPeso" class="inline">Somar Peso</button>
-      <button id="btnLimparPeso" class="inline">Limpar Peso</button>
-      <button id="btnLimparTodosPesos" class="red-btn inline">Limpar Todos os Pesos</button>
+    
+    <label>Valor:</label>
+    <input type="text" id="pesoNovo" maxlength="7" placeholder="0.000 ou 0">
+    
+    <div style="margin-bottom:10px; display:flex; gap:6px; flex-wrap:wrap;">
+      <button id="btnAddPesoPopup" class="green-btn inline" style="flex:1; margin:0;">➕ Adicionar</button>
+      <button id="btnSomarPeso" class="green-btn inline" style="flex:1; margin:0;">➕ Somar</button>
+      <button id="btnLimparPeso" class="red-btn inline" style="flex:1; margin:0;">✕ Limpar</button>
+      <button id="btnDesbloqueia" class="red-btn inline" style="display:none; flex:1; margin:0;">🔓 Desbloquear</button>
     </div>
-    <button id="btnCalcularTotal" class="purple-btn">Calcular Peso Total</button>
-    <button id="btnPreencherZeros" style="background:linear-gradient(90deg,#2196f3 0%,#64b5f6 100%);color:#fff;font-size:16px;border:none;padding:12px;width:100%;margin-bottom:8px;border-radius:6px;">Preencher todos vazios com 0,000</button>
-    <button class="popupCancelBtn" style="margin-top:10px;">Cancelar</button>
+    
+    <button id="btnLimparTodosPesos" class="red-btn" style="width:100%; margin-bottom:10px;">🗑️ Limpar Tudo da Coluna</button>
+    <button id="btnCalcularTotal" class="purple-btn" style="width:100%; margin-bottom:10px;">📊 Calcular Total</button>
+    <button id="btnPreencherZeros" class="blue-btn" style="width:100%; margin-bottom:10px;">0️⃣ Preencher Vazios</button>
+    
+    <button class="popupCancelBtn">Cancelar</button>
   </div>
 
   <!-- POPUP COLUNAS -->
   <div class="popup" id="popup-colunas">
-    <h3>Colunas</h3>
-    <button id="btnNovaColuna"> Nova coluna</button>
+    <h3>📊 Gerenciar Colunas</h3>
+    <button id="btnNovaColuna" class="green-btn" style="width:100%; margin-bottom:10px;">➕ Nova Coluna</button>
+    
+    <label>Remover coluna:</label>
     <select id="selRemCol"></select>
-    <button id="btnRemColuna"> Remover coluna</button>
+    
+    <button id="btnRemColuna" class="red-btn" style="width:100%; margin-bottom:10px;">✕ Remover Coluna</button>
     <button class="popupCancelBtn">Fechar</button>
   </div>
 
   <!-- POPUP EXPORTAR PNG -->
   <div class="popup" id="popup-exportarPNG">
-    <h3>Exportar PNG</h3>
-    <div style="margin-bottom: 12px; font-size:16px;">
-      Escolha a forma de exportar sua lista de doces:
-    </div>
-    <button id="btnExportarChunk" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-       Baixar em várias partes (dividido)
-    </button>
-    <button id="btnExportarUnico" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#9b27b0 0%,#af40bf 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-       Baixar em imagem única (alta qualidade)
-    </button>
-    <button class="popupCancelBtn" style="margin-top:10px; width:100%;">Cancelar</button>
+    <h3>🖼️ Exportar PNG</h3>
+    <p style="color:#aaa; text-align:center; margin-bottom:16px;">Escolha como exportar sua lista:</p>
+    
+    <button id="btnExportarChunk" class="green-btn" style="width:100%; margin-bottom:10px;">📦 Várias Partes</button>
+    <button id="btnExportarUnico" class="purple-btn" style="width:100%; margin-bottom:10px;">🎨 Uma Imagem Única</button>
+    
+    <button class="popupCancelBtn">Cancelar</button>
   </div>
 
   <!-- POPUP EXPORTAR PDF -->
   <div class="popup" id="popup-exportarPDF">
-    <h3>Exportar PDF</h3>
-    <div style="margin-bottom: 12px; font-size:16px;">
-      Escolha o tipo de PDF:
-    </div>
-    <button id="btnExportarPDFPreenchido" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-       PDF com dados preenchidos
-    </button>
-    <button id="btnExportarPDFBranco" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#9b27b0 0%,#af40bf 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-       PDF em branco para escrita manual
-    </button>
-    <button class="popupCancelBtn" style="margin-top:10px; width:100%;">Cancelar</button>
+    <h3>📄 Exportar PDF</h3>
+    <p style="color:#aaa; text-align:center; margin-bottom:16px;">Escolha o tipo de PDF:</p>
+    
+    <button id="btnExportarPDFPreenchido" class="green-btn" style="width:100%; margin-bottom:10px;">✅ Com Dados</button>
+    
+    <button class="popupCancelBtn">Cancelar</button>
+  </div>
+
+  <!-- POPUP INFORMAÇÃO PDF -->
+  <div class="popup" id="popup-infoPDF">
+    <h3>📄 Como Usar o PDF</h3>
+    <p style="color:#fff; margin-bottom:12px; font-size:14px;">
+      <b>1️⃣ Baixar:</b> Clique no botão "Salvar" que aparecerá no seu navegador
+    </p>
+    <p style="color:#fff; margin-bottom:12px; font-size:14px;">
+      <b>2️⃣ Salvar em Pendrive:</b> Conecte o pendrive, copie o arquivo PDF para ele
+    </p>
+    <p style="color:#fff; margin-bottom:12px; font-size:14px;">
+      <b>3️⃣ Imprimir:</b> Abra o PDF em qualquer computador, clique em Print (Ctrl+P), escolha sua impressora e imprima!
+    </p>
+    <p style="color:#64b5f6; margin-bottom:16px; font-size:14px; text-align:center;">
+      ✅ Pronto para usar! A lista saiu perfeita no papel!
+    </p>
+    <button class="popupCancelBtn" style="width:100%;">Entendi!</button>
   </div>
 
   <!-- POPUP CONFIRMAR SUBSTITUIÇÃO -->
   <div class="popup" id="popup-confirmarSubstituicao">
-    <h3>Valor Atual</h3>
-    <p id="valorAtualText" style="font-size: 16px; margin-bottom: 16px; color: #64b5f6;"></p>
-    <p style="margin-bottom: 16px; color: #fff;">Este doce já possui um valor nesta coluna. Clique OK para fechar.</p>
+    <h3>⚠️ Valor Atual</h3>
+    <p id="valorAtualText" style="font-size: 16px; margin-bottom: 16px; color: #64b5f6; text-align: center;"></p>
+    <p style="margin-bottom: 16px; color: #fff;">Este doce já possui um valor nesta coluna.</p>
     <button class="popupCancelBtn" style="width: 100%;">OK</button>
   </div>
 
   <script>
-    let todasListas={}, listaAtual="Lista principal (LPP)", listaDoces=[], totalColunas=1, tipoLista="peso";
+    let todasListas={}, listaAtual="", listaDoces=[], totalColunas=1, tipoLista="peso";
     let historicoAcoes = [];
     let ordenacaoAtual = "alfabetica";
     let pesoBloqueado = false;
-
-    const LISTA_PRINCIPAL_PESO = "Lista principal (LPP)";
-    const LISTA_PRINCIPAL_UNIDADE = "Lista principal (LPU)";
-    const LISTAS_PRINCIPAIS = [LISTA_PRINCIPAL_PESO, LISTA_PRINCIPAL_UNIDADE];
 
     document.addEventListener("DOMContentLoaded",()=>{
       carregarTodasListas();
@@ -283,18 +315,10 @@
       document.getElementById("btnLimparPeso").onclick = limparPeso;
       document.getElementById("btnLimparTodosPesos").onclick = limparTodosPesosColuna;
       document.getElementById("buscaPeso").addEventListener('input', filtrarDropdownPeso);
-      document.getElementById("btnLimpaBuscaPeso").onclick = ()=>{
-        document.getElementById("buscaPeso").value = "";
-        filtrarDropdownPeso();
-      };
       document.getElementById("btnCalcularTotal").onclick = calcularPesoTotal;
       document.getElementById("btnPreencherZeros").onclick = preencherZeros;
 
       document.getElementById("buscaRemover").addEventListener('input', filtrarDropdownRemover);
-      document.getElementById("btnLimpaBuscaRemover").onclick = ()=>{
-        document.getElementById("buscaRemover").value = "";
-        filtrarDropdownRemover();
-      };
 
       document.getElementById("btnExportarChunk").onclick = function(){
         fecharPopup(); baixarPNGVarios();
@@ -304,9 +328,6 @@
       };
       document.getElementById("btnExportarPDFPreenchido").onclick = function(){
         fecharPopup(); exportarPDFPreenchido();
-      };
-      document.getElementById("btnExportarPDFBranco").onclick = function(){
-        fecharPopup(); exportarPDFBranco();
       };
 
       let pesoInput = document.getElementById('pesoNovo');
@@ -367,12 +388,14 @@
     function novaLista() {
       let nome = document.getElementById('nomeLista').value.trim();
       let tipo = document.getElementById('tipoLista').value;
-      if(!nome || todasListas[nome]) return alert("Nome já existe ou inválido!");
+      let nomeComEmoji = (tipo === "peso" ? "⚖️" : "🔢") + " " + nome;
       
-      salvarAcao(`Criar lista "${nome}"`);
+      if(!nome || todasListas[nomeComEmoji]) return alert("Nome já existe ou inválido!");
       
-      todasListas[nome]={listaDoces:[],totalColunas:1,tipo:tipo}; 
-      listaAtual=nome;
+      salvarAcao(`Criar lista "${nomeComEmoji}"`);
+      
+      todasListas[nomeComEmoji]={listaDoces:[],totalColunas:1,tipo:tipo}; 
+      listaAtual=nomeComEmoji;
       carregarListaAtual(); 
       atualizarListaSelect(); 
       salvarTodasListas();
@@ -381,22 +404,32 @@
     }
 
     function removerLista() {
-      if(LISTAS_PRINCIPAIS.includes(listaAtual)) return alert("Não pode remover as listas principais!");
+      if(!listaAtual || listaAtual === "") return alert("Nenhuma lista selecionada!");
+      if(listaAtual === "⚖️ Peso" || listaAtual === "🔢 Unidade") return alert("Não pode remover as listas principais!");
       if(!confirm("Tem certeza?")) return;
       
       salvarAcao(`Remover lista "${listaAtual}"`);
       
-      delete todasListas[listaAtual]; 
-      listaAtual="Lista principal (LPP)";
-      carregarListaAtual(); 
+      delete todasListas[listaAtual];
+      let chaves = Object.keys(todasListas);
+      listaAtual = chaves.length > 0 ? chaves[0] : "";
+      
+      if(listaAtual) {
+        carregarListaAtual();
+      } else {
+        listaDoces = [];
+        desenharTabela();
+      }
       atualizarListaSelect(); 
       salvarTodasListas();
     }
 
     function trocarLista() {
       listaAtual = document.getElementById("listaSelect").value;
-      carregarListaAtual(); 
-      desenharTabela();
+      if(listaAtual) {
+        carregarListaAtual();
+        desenharTabela();
+      }
     }
 
     function atualizarListaSelect() {
@@ -412,43 +445,66 @@
 
     // LOCALSTORAGE
     function salvarTodasListas() {
-      todasListas[listaAtual]={listaDoces,totalColunas,tipo:tipoLista};
+      if(listaAtual) {
+        todasListas[listaAtual]={listaDoces,totalColunas,tipo:tipoLista};
+      }
       localStorage.setItem("todasListas",JSON.stringify(todasListas));
     }
 
     function carregarTodasListas() {
       try {
         todasListas=JSON.parse(localStorage.getItem("todasListas"))||{};
-        if (!todasListas[LISTA_PRINCIPAL_PESO]) {
-          todasListas[LISTA_PRINCIPAL_PESO]={listaDoces:[],totalColunas:1,tipo:"peso"};
+        
+        // REMOVE LISTAS ANTIGAS (compatibilidade)
+        delete todasListas["🍬 Lista Principal (Peso)"];
+        delete todasListas["🍬 Lista Principal (Unidade)"];
+        delete todasListas["Lista principal (LPP)"];
+        delete todasListas["Lista principal (LPU)"];
+        
+        // CRIA LISTAS PRINCIPAIS SE NÃO EXISTIREM
+        if (!todasListas["⚖️ Peso"]) {
+          todasListas["⚖️ Peso"] = {listaDoces:[],totalColunas:1,tipo:"peso"};
         }
-        if (!todasListas[LISTA_PRINCIPAL_UNIDADE]) {
-          todasListas[LISTA_PRINCIPAL_UNIDADE]={listaDoces:[],totalColunas:1,tipo:"unidade"};
+        if (!todasListas["🔢 Unidade"]) {
+          todasListas["🔢 Unidade"] = {listaDoces:[],totalColunas:1,tipo:"unidade"};
+        }
+        
+        let chaves = Object.keys(todasListas);
+        if(chaves.length === 0) {
+          listaAtual = "⚖️ Peso";
+          listaDoces = [];
+          totalColunas = 1;
+          tipoLista = "peso";
+        } else {
+          listaAtual = chaves[0];
+          carregarListaAtual();
         }
       }catch{ 
-        todasListas={
-          [LISTA_PRINCIPAL_PESO]:{listaDoces:[],totalColunas:1,tipo:"peso"},
-          [LISTA_PRINCIPAL_UNIDADE]:{listaDoces:[],totalColunas:1,tipo:"unidade"}
-        }; 
+        listaAtual = "⚖️ Peso";
+        todasListas = {
+          "⚖️ Peso": {listaDoces:[],totalColunas:1,tipo:"peso"},
+          "🔢 Unidade": {listaDoces:[],totalColunas:1,tipo:"unidade"}
+        };
+        listaDoces = [];
+        carregarListaAtual();
       }
-      listaAtual=LISTA_PRINCIPAL_PESO;
-      carregarListaAtual(); 
       atualizarListaSelect();
     }
 
     function carregarListaAtual() {
+      if(!listaAtual || !todasListas[listaAtual]) return;
       let dados = todasListas[listaAtual];
-      listaDoces = dados.listaDoces; 
-      totalColunas = dados.totalColunas||1;
+      listaDoces = dados.listaDoces || []; 
+      totalColunas = dados.totalColunas || 1;
       tipoLista = dados.tipo || "peso";
       desenharTabela(); 
       salvarTodasListas();
     }
 
-    // TABELA
+    // TABELA COM LINHAS
     function desenharTabela(subset=null) {
       let docesParaDesenhar = subset || listaDoces;
-      let ths = `<tr><th>#</th><th>Doce</th>`;
+      let ths = `<tr><th>#</th><th>🍬 Doce</th>`;
       for(let i=1;i<=totalColunas;i++) ths+=`<th>Q${i}</th>`;
       ths+=`</tr>`;
       document.querySelector("#tabela thead").innerHTML = ths;
@@ -491,10 +547,10 @@
 
         if (tipoLista === "unidade") {
           document.getElementById('btnCalcularTotal').style.display = 'none';
-          document.getElementById('btnPreencherZeros').innerHTML = 'Preencher todos vazios com 0';
+          document.getElementById('btnPreencherZeros').innerHTML = '0️⃣ Preencher com 0';
         } else {
           document.getElementById('btnCalcularTotal').style.display = 'block';
-          document.getElementById('btnPreencherZeros').innerHTML = 'Preencher todos vazios com 0,000';
+          document.getElementById('btnPreencherZeros').innerHTML = '0️⃣ Preencher com 0,000';
         }
       }
       if(tipo==='colunas') montarSelColuna();
@@ -633,7 +689,7 @@
         document.getElementById('btnSomarPeso').disabled = true;
         document.getElementById('btnLimparPeso').disabled = true;
         document.getElementById('btnDesbloqueia').style.display = 'inline-block';
-        alert("Você tentou adicionar peso ao item 'errado'. O botão está bloqueado. Clique no ✕ Desbloquear para desbloquear.");
+        alert("Você tentou adicionar peso ao item 'errado'. O botão está bloqueado. Clique no 🔓 Desbloquear para desbloquear.");
         return;
       }
       
@@ -676,7 +732,7 @@
         document.getElementById('btnSomarPeso').disabled = true;
         document.getElementById('btnLimparPeso').disabled = true;
         document.getElementById('btnDesbloqueia').style.display = 'inline-block';
-        alert("Você tentou somar peso ao item 'errado'. O botão está bloqueado. Clique no ✕ Desbloquear para desbloquear.");
+        alert("Você tentou somar peso ao item 'errado'. O botão está bloqueado. Clique no 🔓 Desbloquear para desbloquear.");
         return;
       }
       
@@ -717,7 +773,7 @@
         document.getElementById('btnSomarPeso').disabled = true;
         document.getElementById('btnLimparPeso').disabled = true;
         document.getElementById('btnDesbloqueia').style.display = 'inline-block';
-        alert("Você tentou limpar peso do item 'errado'. O botão está bloqueado. Clique no ✕ Desbloquear para desbloquear.");
+        alert("Você tentou limpar peso do item 'errado'. O botão está bloqueado. Clique no 🔓 Desbloquear para desbloquear.");
         return;
       }
       
@@ -744,7 +800,7 @@
       listaDoces.forEach(doc=>doc[coluna]="");
       desenharTabela();
       salvarTodasListas();
-      alert("Todos os pesos da coluna " + coluna + " foram limpos.");
+      alert("✅ Todos os pesos da coluna " + coluna + " foram limpos.");
     }
 
     function calcularPesoTotal() {
@@ -755,7 +811,7 @@
           if(!isNaN(val)) total += val;
         }
       });
-      alert(`Peso total de todos os doces na lista: ${total.toFixed(3)}`);
+      alert(`📊 Peso total de todos os doces na lista: ${total.toFixed(3)}`);
     }
 
     function preencherZeros() {
@@ -775,7 +831,7 @@
       if(alterou) {
         desenharTabela();
         salvarTodasListas();
-        alert(`Todos os doces sem valor nessa coluna receberam ${preenchimento}.`);
+        alert(`✅ Todos os doces sem valor nessa coluna receberam ${preenchimento}.`);
       } else {
         alert("Não havia nenhum doce sem valor nessa coluna.");
       }
@@ -802,6 +858,7 @@
       desenharTabela(); 
       montarSelColuna(); 
       salvarTodasListas();
+      alert("✅ Nova coluna adicionada!");
     }
 
     function remColuna() {
@@ -817,10 +874,12 @@
       desenharTabela(); 
       montarSelColuna(); 
       salvarTodasListas();
+      alert("✅ Coluna removida!");
     }
 
     // EXPORTAR/IMPORTAR
     function confirmarExportar() {
+      if(!listaAtual) return alert("Nenhuma lista para exportar!");
       if(!confirm("Deseja exportar os dados da lista atual?")) return;
       salvar();
     }
@@ -854,9 +913,9 @@
           tipoLista=dados.tipo||"peso";
           desenharTabela(); 
           salvarTodasListas();
-          alert("Importado!");
+          alert("✅ Importado com sucesso!");
         } catch {
-          alert("Erro ao importar. Arquivo inválido.");
+          alert("❌ Erro ao importar. Arquivo inválido.");
         }
       };
       reader.readAsText(file);
@@ -869,10 +928,9 @@
       
       listaDoces=[]; 
       totalColunas=1;
-      historicoAcoes=[];
       desenharTabela(); 
       salvarTodasListas();
-      atualizarBtnUndo();
+      alert("🗑️ Lista apagada!");
     }
 
     // ORDENAÇÃO
@@ -922,10 +980,10 @@
       let baixarChunk = (chunk, idx, totalChunks, callback) => {
         desenharTabela(chunk);
         setTimeout(() => {
-          html2canvas(document.getElementById("tabela")).then(canvas=>{
+          html2canvas(document.getElementById("tabela"), {scale: 3, backgroundColor: '#1e1e1e'}).then(canvas=>{
             let link=document.createElement("a");
             let n = idx+1;
-            link.download=`lista_${n}_de_${totalChunks}.png`;
+            link.download=`doces_${n}_de_${totalChunks}.png`;
             link.href=canvas.toDataURL();
             link.click();
             if (callback) callback();
@@ -965,16 +1023,16 @@
       }).then(canvas => {
         tabela.style.cssText = origStyle;
         const link = document.createElement('a');
-        link.download = 'lista_doces_unica.png';
+        link.download = 'doces_unica.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
       }).catch(err=>{
         tabela.style.cssText = origStyle;
-        alert("Erro ao gerar imagem única: "+err);
+        alert("❌ Erro ao gerar imagem: "+err);
       });
     }
 
-    // PDF
+    // PDF CORRIGIDO - COM LINHA FINAL E PÁGINA 2 FUNCIONANDO
     function exportarPDFPreenchido() {
       if (!listaDoces.length) {
         alert("A lista está vazia!");
@@ -986,89 +1044,103 @@
       const pageHeight = doc.internal.pageSize.getHeight();
       const pageWidth = doc.internal.pageSize.getWidth();
       const margin = 10;
-      let yPosition = margin;
-
-      doc.setFont("Arial", "bold");
-      doc.setFontSize(16);
-      doc.text(`Lista de Doces - ${listaAtual}`, margin, yPosition);
-      yPosition += 15;
-
-      doc.setFont("Arial", "bold");
-      doc.setFontSize(11);
-      doc.setFillColor(41, 128, 185);
-      doc.setTextColor(255, 255, 255);
+      const rowHeight = 6.5;
+      const maxLinhasParPagina = 34;
 
       let colWidth = (pageWidth - 2 * margin) / (totalColunas + 2);
-      doc.rect(margin, yPosition, pageWidth - 2 * margin, 7, 'F');
-      doc.text("#", margin + 2, yPosition + 5);
-      doc.text("Doce", margin + colWidth + 2, yPosition + 5);
-      for (let i = 1; i <= totalColunas; i++) {
-        doc.text(`Q${i}`, margin + (i + 1) * colWidth + 2, yPosition + 5);
+      let paginaAtual = 1;
+      let indiceDoce = 0;
+
+      function desenharCabecalho() {
+        let yPos = margin;
+
+        doc.setFont("Arial", "bold");
+        doc.setFontSize(14);
+        doc.text(`🍬 Lista de Doces - ${listaAtual}`, margin, yPos);
+        yPos += 8;
+
+        doc.setFont("Arial", "normal");
+        doc.setFontSize(8);
+        doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')} | Página ${paginaAtual}`, margin, yPos);
+        yPos += 6;
+
+        // Cabeçalho tabela
+        doc.setFont("Arial", "bold");
+        doc.setFontSize(10);
+        doc.setFillColor(41, 128, 185);
+        doc.setTextColor(255, 255, 255);
+        doc.setDrawColor(41, 128, 185);
+        doc.setLineWidth(0.5);
+
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 6, 'F');
+        
+        for(let i = 0; i <= totalColunas + 1; i++) {
+          let x = margin + i * colWidth;
+          doc.line(x, yPos, x, yPos + 6);
+        }
+
+        doc.text("#", margin + 2, yPos + 4);
+        doc.text("🍬 Doce", margin + colWidth + 2, yPos + 4);
+        for (let i = 1; i <= totalColunas; i++) {
+          doc.text(`Q${i}`, margin + (i + 1) * colWidth + 2, yPos + 4);
+        }
+        
+        return yPos + 6;
       }
-      yPosition += 10;
+
+      let yPosition = desenharCabecalho();
 
       doc.setFont("Arial", "normal");
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setTextColor(0, 0, 0);
+      doc.setDrawColor(150, 150, 150);
+      doc.setLineWidth(0.3);
 
-      listaDoces.forEach((doc_item, i) => {
-        if (yPosition > pageHeight - margin) {
+      let linhasNaPagina = 0;
+
+      // Desenhar todas as linhas
+      while(indiceDoce < listaDoces.length) {
+        // Verificar se precisa nova página
+        if(linhasNaPagina >= maxLinhasParPagina) {
           doc.addPage();
-          yPosition = margin;
+          paginaAtual++;
+          yPosition = desenharCabecalho();
+          linhasNaPagina = 0;
         }
 
-        doc.text((i + 1).toString(), margin + 2, yPosition);
-        doc.text(doc_item.nome, margin + colWidth + 2, yPosition);
+        let doce_item = listaDoces[indiceDoce];
+
+        // Linha horizontal superior
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+
+        // Linhas verticais
+        for(let i = 0; i <= totalColunas + 1; i++) {
+          let x = margin + i * colWidth;
+          doc.line(x, yPosition, x, yPosition + rowHeight);
+        }
+
+        // Conteúdo
+        doc.text((indiceDoce + 1).toString(), margin + 2, yPosition + 4);
+        doc.text(doce_item.nome, margin + colWidth + 2, yPosition + 4);
         for (let c = 1; c <= totalColunas; c++) {
-          doc.text(doc_item["Q" + c] || "", margin + (c + 1) * colWidth + 2, yPosition);
+          doc.text(doce_item["Q" + c] || "", margin + (c + 1) * colWidth + 2, yPosition + 4);
         }
-        yPosition += 7;
-      });
-
-      doc.save(`lista-doces-${listaAtual}.pdf`);
-    }
-
-    function exportarPDFBranco() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const margin = 10;
-      let yPosition = margin;
-
-      doc.setFont("Arial", "bold");
-      doc.setFontSize(16);
-      doc.text(`Lista de Doces - ${listaAtual}`, margin, yPosition);
-      yPosition += 15;
-
-      doc.setFont("Arial", "bold");
-      doc.setFontSize(11);
-      doc.setDrawColor(41, 128, 185);
-      doc.setLineWidth(0.5);
-
-      let colWidth = (pageWidth - 2 * margin) / (totalColunas + 2);
-      let rowHeight = 15;
-
-      doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight);
-      doc.text("#", margin + 2, yPosition + 10);
-      doc.text("Doce", margin + colWidth + 2, yPosition + 10);
-      for (let i = 1; i <= totalColunas; i++) {
-        doc.text(`Q${i}`, margin + (i + 1) * colWidth + 2, yPosition + 10);
-      }
-      yPosition += rowHeight;
-
-      doc.setFont("Arial", "normal");
-      for (let i = 0; i < 20; i++) {
-        if (yPosition + rowHeight > pageHeight - margin) {
-          doc.addPage();
-          yPosition = margin;
-        }
-
-        doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight);
+        
         yPosition += rowHeight;
+        linhasNaPagina++;
+        indiceDoce++;
       }
 
-      doc.save(`lista-doces-em-branco-${listaAtual}.pdf`);
+      // LINHA FINAL - IMPORTANTE!
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      for(let i = 0; i <= totalColunas + 1; i++) {
+        let x = margin + i * colWidth;
+        doc.line(x, yPosition, x, yPosition);
+      }
+
+      doc.save(`doces-${listaAtual}.pdf`);
+      
+      setTimeout(() => abrirPopup('infoPDF'), 500);
     }
   </script>
 </body>
