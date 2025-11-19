@@ -105,18 +105,18 @@
 
     <div class="btn-group">
       <select id="listaSelect"></select>
-      <button id="btnNovaLista">➕ Nova Lista</button>
-      <button id="btnRemoverLista">🗑️ Remover Lista</button>
-      <button id="btnAddPeso">⚖️ Adicionar Peso</button>
-      <button id="btnColunas">📊 Colunas</button>
-      <button id="btnAddDoce">➕ Adicionar Doce</button>
-      <button id="btnRemDoce">🗑️ Remover Doce</button>
-      <button id="btnExportar">💾 Exportar</button>
-      <button id="btnImportar">📂 Importar</button>
+      <button id="btnNovaLista"> Nova Lista</button>
+      <button id="btnRemoverLista"> Remover Lista</button>
+      <button id="btnAddPeso"> Adicionar Peso</button>
+      <button id="btnColunas"> Colunas</button>
+      <button id="btnAddDoce"> Adicionar Doce</button>
+      <button id="btnRemDoce"> Remover Doce</button>
+      <button id="btnExportar"> Exportar</button>
+      <button id="btnImportar"> Importar</button>
       <input id="importar" type="file" accept=".json" style="display:none">
-      <button id="btnPNG">🖼️ PNG</button>
-      <button id="btnPDF">📄 PDF</button>
-      <button id="btnApagarTudo" class="red-btn">⚠️ Apagar tudo</button>
+      <button id="btnPNG"> PNG</button>
+      <button id="btnPDF"> PDF</button>
+      <button id="btnApagarTudo" class="red-btn"> Apagar tudo</button>
       <select id="ordenacaoSelect">
         <option value="alfabetica">Alfabética</option>
         <option value="pesoAsc">Peso crescente</option>
@@ -175,6 +175,7 @@
     <input type="text" id="pesoNovo" maxlength="7" placeholder="Peso (ex: 0.250)">
     <div style="margin-bottom:8px;">
       <button id="btnAddPesoPopup" class="inline">Adicionar Peso</button>
+      <button id="btnDesbloqueia" class="red-btn inline" style="display:none;">✕ Desbloquear</button>
       <button id="btnSomarPeso" class="inline">Somar Peso</button>
       <button id="btnLimparPeso" class="inline">Limpar Peso</button>
       <button id="btnLimparTodosPesos" class="red-btn inline">Limpar Todos os Pesos</button>
@@ -187,9 +188,9 @@
   <!-- POPUP COLUNAS -->
   <div class="popup" id="popup-colunas">
     <h3>Colunas</h3>
-    <button id="btnNovaColuna">➕ Nova coluna</button>
+    <button id="btnNovaColuna"> Nova coluna</button>
     <select id="selRemCol"></select>
-    <button id="btnRemColuna">🗑️ Remover coluna</button>
+    <button id="btnRemColuna"> Remover coluna</button>
     <button class="popupCancelBtn">Fechar</button>
   </div>
 
@@ -200,10 +201,10 @@
       Escolha a forma de exportar sua lista de doces:
     </div>
     <button id="btnExportarChunk" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-      📥 Baixar em várias partes (dividido)
+       Baixar em várias partes (dividido)
     </button>
     <button id="btnExportarUnico" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#9b27b0 0%,#af40bf 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-      🖼️ Baixar em imagem única (alta qualidade)
+       Baixar em imagem única (alta qualidade)
     </button>
     <button class="popupCancelBtn" style="margin-top:10px; width:100%;">Cancelar</button>
   </div>
@@ -215,10 +216,10 @@
       Escolha o tipo de PDF:
     </div>
     <button id="btnExportarPDFPreenchido" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#2196f3 0%,#64b5f6 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-      📄 PDF com dados preenchidos
+       PDF com dados preenchidos
     </button>
     <button id="btnExportarPDFBranco" style="margin-bottom:8px; width:100%; background: linear-gradient(90deg,#9b27b0 0%,#af40bf 100%); color:#fff; font-size:16px; border:none; padding:12px; cursor:pointer; border-radius:6px;">
-      📝 PDF em branco para escrita manual
+       PDF em branco para escrita manual
     </button>
     <button class="popupCancelBtn" style="margin-top:10px; width:100%;">Cancelar</button>
   </div>
@@ -235,6 +236,7 @@
     let todasListas={}, listaAtual="Lista principal (LPP)", listaDoces=[], totalColunas=1, tipoLista="peso";
     let historicoAcoes = [];
     let ordenacaoAtual = "alfabetica";
+    let pesoBloqueado = false;
 
     const LISTA_PRINCIPAL_PESO = "Lista principal (LPP)";
     const LISTA_PRINCIPAL_UNIDADE = "Lista principal (LPU)";
@@ -276,6 +278,7 @@
       document.getElementById("popupRemDoceBtn").onclick = remDoce;
 
       document.getElementById("btnAddPesoPopup").onclick = addPeso;
+      document.getElementById("btnDesbloqueia").onclick = desbloquearPeso;
       document.getElementById("btnSomarPeso").onclick = somarPeso;
       document.getElementById("btnLimparPeso").onclick = limparPeso;
       document.getElementById("btnLimparTodosPesos").onclick = limparTodosPesosColuna;
@@ -470,16 +473,20 @@
         filtrarDropdownRemover();
       }
       if(tipo==='addPeso') {
+        pesoBloqueado = false;
+        document.getElementById('btnAddPesoPopup').disabled = false;
+        document.getElementById('btnSomarPeso').disabled = false;
+        document.getElementById('btnLimparPeso').disabled = false;
+        document.getElementById('btnDesbloqueia').style.display = 'none';
+        
         montarSelPeso();
         document.getElementById('buscaPeso').value = "";
         document.getElementById('pesoNovo').value = "";
         let sel = document.getElementById('selPesoDoce');
-        sel.innerHTML = '';
-        let defaultOpt = document.createElement('option');
-        defaultOpt.value = defaultOpt.text = '-- Selecione um doce --';
-        sel.appendChild(defaultOpt);
-        montarSelPeso();
-        sel.value = '-- Selecione um doce --';
+        let erradoOpt = document.createElement('option');
+        erradoOpt.value = erradoOpt.text = 'errado';
+        sel.insertBefore(erradoOpt, sel.firstChild);
+        sel.value = 'errado';
         filtrarDropdownPeso();
 
         if (tipoLista === "unidade") {
@@ -561,8 +568,8 @@
       let sel = document.getElementById('selPesoDoce');
       for(let i=0;i<sel.options.length;i++) {
         let opt = sel.options[i];
-        if (opt.value === '-- Selecione um doce --') {
-          opt.style.display = "block";
+        if (opt.value === 'errado') {
+          opt.style.display = "none";
           continue;
         }
         let optTxt = opt.text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -570,21 +577,26 @@
         let optBusca = optTxt.replace(/\s+/g, " ").trim();
         opt.style.display = optBusca.includes(termoBusca) ? "block" : "none";
       }
-      let visiveis = [...sel.options].filter(o => o.style.display == "block" && o.value !== '-- Selecione um doce --');
+      let visiveis = [...sel.options].filter(o => o.style.display == "block" && o.value !== 'errado');
       if (!visiveis.some(o => o.value === sel.value)) {
-        sel.value = '-- Selecione um doce --';
+        sel.value = 'errado';
       }
     }
 
     function montarSelPeso() {
       let selD = document.getElementById('selPesoDoce');
       let selC = document.getElementById('selPesoCol');
-      selC.innerHTML = '';
+      
+      let selectedValue = selD.value;
+      selD.innerHTML = '';
+      
       listaDoces.forEach(d=>{
         let opt=document.createElement('option');
         opt.value=opt.text=d.nome;
         selD.appendChild(opt);
       });
+      
+      selC.innerHTML = '';
       for(let i=1;i<=totalColunas;i++){
         let opt=document.createElement('option');
         opt.value=opt.text="Q"+i;
@@ -609,11 +621,22 @@
     }
 
     function addPeso() {
+      if(pesoBloqueado) return;
+      
       let doce = document.getElementById('selPesoDoce').value;
       let coluna = document.getElementById('selPesoCol').value;
       let valor = document.getElementById('pesoNovo').value.trim();
       
-      if(doce==='-- Selecione um doce --') return alert("Selecione um doce!");
+      if(doce==='errado') {
+        pesoBloqueado = true;
+        document.getElementById('btnAddPesoPopup').disabled = true;
+        document.getElementById('btnSomarPeso').disabled = true;
+        document.getElementById('btnLimparPeso').disabled = true;
+        document.getElementById('btnDesbloqueia').style.display = 'inline-block';
+        alert("Você tentou adicionar peso ao item 'errado'. O botão está bloqueado. Clique no ✕ Desbloquear para desbloquear.");
+        return;
+      }
+      
       if(!validarPeso(valor)) return alert(`Valor inválido! ${tipoLista === "unidade" ? "Use números inteiros entre 0 e 99999." : "Use formato 0.000"}`);
       
       let doceObj = listaDoces.find(d=>d.nome===doce);
@@ -629,15 +652,33 @@
       desenharTabela();
       salvarTodasListas();
       document.getElementById('pesoNovo').value="";
-      document.getElementById('selPesoDoce').value = '-- Selecione um doce --';
+      document.getElementById('selPesoDoce').value = 'errado';
+    }
+
+    function desbloquearPeso() {
+      pesoBloqueado = false;
+      document.getElementById('btnAddPesoPopup').disabled = false;
+      document.getElementById('btnSomarPeso').disabled = false;
+      document.getElementById('btnLimparPeso').disabled = false;
+      document.getElementById('btnDesbloqueia').style.display = 'none';
     }
 
     function somarPeso() {
+      if(pesoBloqueado) return;
+      
       let doce = document.getElementById('selPesoDoce').value;
       let coluna = document.getElementById('selPesoCol').value;
       let valor = document.getElementById('pesoNovo').value.trim();
       
-      if(doce==='-- Selecione um doce --') return alert("Selecione um doce!");
+      if(doce==='errado') {
+        pesoBloqueado = true;
+        document.getElementById('btnAddPesoPopup').disabled = true;
+        document.getElementById('btnSomarPeso').disabled = true;
+        document.getElementById('btnLimparPeso').disabled = true;
+        document.getElementById('btnDesbloqueia').style.display = 'inline-block';
+        alert("Você tentou somar peso ao item 'errado'. O botão está bloqueado. Clique no ✕ Desbloquear para desbloquear.");
+        return;
+      }
       
       let doceObj = listaDoces.find(d=>d.nome===doce);
       if(!doceObj[coluna]) return alert("Esse doce não possui peso definido nessa coluna para somar.");
@@ -661,14 +702,24 @@
       desenharTabela();
       salvarTodasListas();
       document.getElementById('pesoNovo').value="";
-      document.getElementById('selPesoDoce').value = '-- Selecione um doce --';
+      document.getElementById('selPesoDoce').value = 'errado';
     }
 
     function limparPeso() {
+      if(pesoBloqueado) return;
+      
       let doce = document.getElementById('selPesoDoce').value;
       let coluna = document.getElementById('selPesoCol').value;
       
-      if(doce==='-- Selecione um doce --') return alert("Selecione um doce!");
+      if(doce==='errado') {
+        pesoBloqueado = true;
+        document.getElementById('btnAddPesoPopup').disabled = true;
+        document.getElementById('btnSomarPeso').disabled = true;
+        document.getElementById('btnLimparPeso').disabled = true;
+        document.getElementById('btnDesbloqueia').style.display = 'inline-block';
+        alert("Você tentou limpar peso do item 'errado'. O botão está bloqueado. Clique no ✕ Desbloquear para desbloquear.");
+        return;
+      }
       
       let doceObj = listaDoces.find(d=>d.nome===doce);
       if(!doceObj[coluna]) return alert("Esse doce já está sem peso nessa coluna.");
@@ -680,7 +731,7 @@
       desenharTabela();
       salvarTodasListas();
       document.getElementById('pesoNovo').value="";
-      document.getElementById('selPesoDoce').value = '-- Selecione um doce --';
+      document.getElementById('selPesoDoce').value = 'errado';
     }
 
     function limparTodosPesosColuna() {
